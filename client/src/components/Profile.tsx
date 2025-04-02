@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface ProfileProps {
@@ -21,7 +22,7 @@ interface ProfileResponse {
 
 const Profile: React.FC<ProfileProps> = (props) => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     getUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,6 +111,14 @@ const Profile: React.FC<ProfileProps> = (props) => {
                 </div>
               </div>
             )}
+          </div>
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="bg-blue-600 hover:bg-blue-700 text-black font-bold py-2 px-6 rounded"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
