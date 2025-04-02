@@ -14,11 +14,7 @@ const Dashboard = () => {
         <Dashboard_main />
       </main>
     </div>
-    /*
-    <main className="grid gap-4 p-4 grid-cols-[220px,_1fr] ">
-      <Dashboard_main />
-      <Sidebar />
-    </main>*/
+
   )
 }
 
