@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Header from './components/Header';
 import Profile from './components/Profile';
 import Register from './components/Register';
+import Dashboard from './components/Dashboard';
 import useToken from './components/useToken.tsx';
 
 const App: React.FC = () => {
@@ -21,7 +22,7 @@ const App: React.FC = () => {
           {token ? (
             <Routes>
               <Route path="/profile" element={<Profile token={token} setToken={setToken} />} />
-              {/* You can add other protected routes here */}
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="*" element={<Navigate to="/profile" replace />} />
             </Routes>
           ) : (
