@@ -65,7 +65,7 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({ removeToken }) => 
         <img
           src="https://api.dicebear.com/9.x/notionists/svg"
           alt="avatar"
-          className="w-8 h-8 rounded shrink-0 bg-violet-500 shadow"
+          className="w-8 h-8 rounded shrink-0 bg-green-500 shadow"
         />
         <div className="text-start">
           <span className="text-sm font-bold block">

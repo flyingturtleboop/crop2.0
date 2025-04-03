@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { IconType } from "react-icons";
-import {FiDollarSign, FiHome, FiBarChart,} from "react-icons/fi";
+import {FiDollarSign, FiHome, FiBarChart, FiMapPin } from "react-icons/fi";
 import {PiPlant} from "react-icons/pi";
 
 export const RouteSelect = () => {
@@ -26,6 +26,11 @@ export const RouteSelect = () => {
         Icon={FiBarChart} 
         to="/dashboard/analysis" 
         title="Analysis" 
+      />
+      <SidebarRoute 
+        Icon={FiMapPin} 
+        to="/dashboard/maps" 
+        title="Maps" 
       />
     </div>
   );
