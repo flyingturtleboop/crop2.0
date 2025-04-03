@@ -1,12 +1,8 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { IconType } from "react-icons";
-import {
-  FiDollarSign,
-  FiHome,
-  FiPaperclip,
-  FiBarChart,
-} from "react-icons/fi";
+import {FiDollarSign, FiHome, FiBarChart,} from "react-icons/fi";
+import {PiPlant} from "react-icons/pi";
 
 export const RouteSelect = () => {
   return (
@@ -22,7 +18,7 @@ export const RouteSelect = () => {
         title="Finances" 
       />
       <SidebarRoute 
-        Icon={FiPaperclip} 
+        Icon={PiPlant} 
         to="/dashboard/crops" 
         title="Crops" 
       />
