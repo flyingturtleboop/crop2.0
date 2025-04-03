@@ -14,7 +14,7 @@ const Dashboard: React.FC<DashboardProps> = ({ removeToken }) => {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Sidebar: remains stationary */}
-      <aside className="w-64 h-screen fixed top-0 left-0 border-r bg-white p-4">
+      <aside className="w-64 h-screen fixed top-0 left-0 bg-white p-4">
         <Sidebar removeToken={removeToken} />
       </aside>
 
