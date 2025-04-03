@@ -22,6 +22,8 @@ const CropTable: React.FC = () => {
   const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [editCrop, setEditCrop] = useState<Crop | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 15;
 
   const fetchCrops = async () => {
     try {
@@ -42,6 +44,11 @@ const CropTable: React.FC = () => {
     fetchCrops();
   }, []);
 
+  // Reset pagination when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const handleDelete = async (id: string) => {
     try {
       const token = localStorage.getItem("token");
@@ -60,13 +67,20 @@ const CropTable: React.FC = () => {
     setOpenEdit(true);
   };
 
-  // Filter crops based on the search term (case-insensitive)
+  // Filter crops based on search term (case-insensitive)
   const filteredCrops = crops.filter((crop) =>
     crop.crop_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
     crop.variety.toLowerCase().includes(searchTerm.toLowerCase()) ||
     crop.growth_stage.toLowerCase().includes(searchTerm.toLowerCase()) ||
     crop.extra_notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
     crop.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredCrops.length / itemsPerPage);
+  const paginatedCrops = filteredCrops.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   if (loading) return <p className="p-4">Loading...</p>;
@@ -79,7 +93,7 @@ const CropTable: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setOpenAdd(true)}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-black font-semibold py-2 px-4 rounded"
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-black font-semibold py-2 px-4 rounded shadow-sm"
           >
             <FiPlus size={18} />
             <span>Add Crop</span>
@@ -125,7 +139,7 @@ const CropTable: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-gray-700">
-            {filteredCrops.map((crop) => (
+            {paginatedCrops.map((crop) => (
               <tr key={crop.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3">{crop.crop_type}</td>
                 <td className="px-4 py-3">{crop.variety}</td>
@@ -137,13 +151,13 @@ const CropTable: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEditClick(crop)}
-                      className="text-blue-500 hover:text-blue-700"
+                      className="text-blue-500 hover:text-blue-700 shadow-sm"
                     >
                       <FiEdit size={18} />
                     </button>
                     <button
                       onClick={() => handleDelete(crop.id)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 shadow-sm"
                     >
                       <FiTrash2 size={18} />
                     </button>
@@ -151,7 +165,7 @@ const CropTable: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {filteredCrops.length === 0 && (
+            {paginatedCrops.length === 0 && (
               <tr>
                 <td colSpan={7} className="text-center py-4 text-gray-500">
                   No crops found.
@@ -160,6 +174,44 @@ const CropTable: React.FC = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Bar (always rendered) */}
+      <div className="flex flex-col md:flex-row items-center justify-between mt-4 text-sm text-gray-500">
+        <div>
+          Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+          {Math.min(currentPage * itemsPerPage, filteredCrops.length)} of{" "}
+          {filteredCrops.length} entries
+        </div>
+        <div className="mt-2 md:mt-0 flex items-center gap-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 shadow-sm"
+          >
+            Prev
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 shadow-sm ${
+                page === currentPage ? "bg-gray-200 font-bold" : ""
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 shadow-sm"
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Render the Add Crop modal */}

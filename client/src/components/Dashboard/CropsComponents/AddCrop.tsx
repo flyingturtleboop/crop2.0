@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { FiPlus } from 'react-icons/fi';
 
 interface CropData {
   crop_type: string;
@@ -33,7 +34,7 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: name === 'amount_sown' ? Number(value) : value,
     }));
@@ -47,9 +48,7 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       setOpen(false);
-      if (onCropAdded) {
-        onCropAdded();
-      }
+      if (onCropAdded) onCropAdded();
     } catch (err: any) {
       console.error("Error adding crop:", err);
       setError("Failed to add crop");
@@ -63,10 +62,16 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       {/* Dark overlay */}
-      <div className="fixed inset-0 bg-black opacity-50" onClick={handleCancel}></div>
+      <div
+        className="fixed inset-0 bg-black opacity-50"
+        onClick={handleCancel}
+      ></div>
       {/* Modal content */}
       <div className="relative bg-white rounded-lg p-6 w-full max-w-lg z-10">
-        <h2 className="text-2xl font-bold mb-4">Add New Crop</h2>
+        <h2 className="flex items-center text-2xl font-bold mb-4">
+          <FiPlus className="mr-2" size={24} />
+          Add New Crop
+        </h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -156,15 +161,16 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
             <button
               type="button"
               onClick={handleCancel}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 shadow-sm font-bold py-2 px-4 rounded"
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded shadow-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-green-500 hover:bg-green-600 text-black shadow-sm font-bold py-2 px-4 rounded"
+              className="flex items-center bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded shadow-sm"
             >
-              Add Crop
+              <FiPlus className="mr-2" size={15} />
+              <span>Add Crop</span>
             </button>
           </div>
         </form>

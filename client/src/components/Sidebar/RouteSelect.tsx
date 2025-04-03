@@ -1,82 +1,64 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { IconType } from "react-icons";
-import {
-  FiDollarSign,
-  FiHome,
-  FiPaperclip,
-  FiBarChart,
-} from "react-icons/fi";
+import {FiDollarSign, FiHome, FiBarChart, FiMapPin } from "react-icons/fi";
+import {PiPlant} from "react-icons/pi";
 
-interface RouteSelectProps {
-  collapsed: boolean; // ← new prop
-}
-
-export const RouteSelect: React.FC<RouteSelectProps> = ({ collapsed }) => {
+export const RouteSelect = () => {
   return (
-    <div className="space-y-2">
-      <SidebarRoute
-        Icon={FiHome}
-        to="/dashboard"
-        title="Dashboard"
-        collapsed={collapsed}
+    <div className="space-y-1">
+      <SidebarRoute 
+        Icon={FiHome} 
+        to="/dashboard" 
+        title="Dashboard" 
       />
-      <SidebarRoute
-        Icon={FiDollarSign}
-        to="/dashboard/finances"
-        title="Finances"
-        collapsed={collapsed}
+      <SidebarRoute 
+        Icon={FiDollarSign} 
+        to="/dashboard/finances" 
+        title="Finances" 
       />
-      <SidebarRoute
-        Icon={FiPaperclip}
-        to="/dashboard/crops"
-        title="Crops"
-        collapsed={collapsed}
+      <SidebarRoute 
+        Icon={PiPlant} 
+        to="/dashboard/crops" 
+        title="Crops" 
       />
-      <SidebarRoute
-        Icon={FiBarChart}
-        to="/dashboard/analysis"
-        title="Analysis"
-        collapsed={collapsed}
+      <SidebarRoute 
+        Icon={FiBarChart} 
+        to="/dashboard/analysis" 
+        title="Analysis" 
+      />
+      <SidebarRoute 
+        Icon={FiMapPin} 
+        to="/dashboard/maps" 
+        title="Maps" 
       />
     </div>
   );
 };
 
-// ---- SidebarRoute subcomponent ----
-
 interface SidebarRouteProps {
   Icon: IconType;
   title: string;
   to: string;
-  collapsed: boolean; // ← new prop
 }
 
-const SidebarRoute: React.FC<SidebarRouteProps> = ({
-  Icon,
-  title,
-  to,
-  collapsed,
-}) => {
+const SidebarRoute: React.FC<SidebarRouteProps> = ({ Icon, title, to }) => {
   return (
     <NavLink
       to={to}
-      end
       className={({ isActive }) =>
-        `flex items-center gap-2 w-full rounded px-3 py-2 text-sm transition-colors ring-0 outline-none focus:outline-none focus:ring-0 ${
+        `flex items-center justify-start gap-2 w-full rounded px-3 py-2 text-sm transition-colors ring-0 outline-none focus:outline-none focus:ring-0 ${
           isActive
             ? "bg-gray-100 text-green-800 font-bold"
             : "hover:bg-stone-200 bg-transparent text-stone-500"
         }`
       }
+      end
     >
-      {/* Always show the icon */}
-      <span className="text-gray-400 font-bold">
+      <span className="text-gray-400">
         <Icon size={18} />
       </span>
-
-      {/* Hide the text if collapsed */}
-      {!collapsed && <span>{title}</span>}
+      <span>{title}</span>
     </NavLink>
   );
 };

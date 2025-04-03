@@ -5,6 +5,7 @@ import Dashboard_main from './Dashboard/Dashboard_main';
 import Finances from './Dashboard/Finances';
 import Crops from './Dashboard/Crops';
 import Analysis from './Dashboard/Analysis';
+import Maps from './Dashboard/Maps';
 
 interface DashboardProps {
   removeToken: () => void;
@@ -26,6 +27,7 @@ const Dashboard: React.FC<DashboardProps> = ({ removeToken }) => {
           <Route path="finances" element={<Finances />} />
           <Route path="crops/" element={<Crops />} />
           <Route path="analysis" element={<Analysis />} />
+          <Route path="maps" element={<Maps />} />
           {/* Fallback: if no match, render Dashboard_main */}
           <Route path="*" element={<Dashboard_main />} />
         </Routes>
