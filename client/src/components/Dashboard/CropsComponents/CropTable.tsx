@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { FiEdit, FiTrash2, FiSearch, FiPlus } from "react-icons/fi";
+import AddCrop from "./AddCrop";
+import EditCrop from "./EditCrop";
 
 interface Crop {
   id: string;
@@ -16,8 +18,11 @@ const CropTable: React.FC = () => {
   const [crops, setCrops] = useState<Crop[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [openAdd, setOpenAdd] = useState<boolean>(false);
+  const [openEdit, setOpenEdit] = useState<boolean>(false);
+  const [editCrop, setEditCrop] = useState<Crop | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch crop data from the backend using the '/getcrops' endpoint
   const fetchCrops = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -28,10 +33,6 @@ const CropTable: React.FC = () => {
       setLoading(false);
     } catch (err: any) {
       console.error("Error fetching crops:", err);
-      if (err.response) {
-        console.error("Response data:", err.response.data);
-        console.error("Response status:", err.response.status);
-      }
       setError("Failed to fetch crops");
       setLoading(false);
     }
@@ -41,7 +42,6 @@ const CropTable: React.FC = () => {
     fetchCrops();
   }, []);
 
-  // Delete crop handler
   const handleDelete = async (id: string) => {
     try {
       const token = localStorage.getItem("token");
@@ -55,66 +55,105 @@ const CropTable: React.FC = () => {
     }
   };
 
-  // Placeholder for edit functionality
-  const handleEdit = (id: string) => {
-    alert(`Edit functionality for crop id ${id} coming soon!`);
+  const handleEditClick = (crop: Crop) => {
+    setEditCrop(crop);
+    setOpenEdit(true);
   };
+
+  // Filter crops based on the search term (case-insensitive)
+  const filteredCrops = crops.filter((crop) =>
+    crop.crop_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    crop.variety.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    crop.growth_stage.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    crop.extra_notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    crop.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (loading) return <p className="p-4">Loading...</p>;
   if (error) return <p className="p-4 text-red-500">{error}</p>;
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Crop Tracker</h2>
-        {/* "Add Crop" button navigates to the add crop page */}
-        <Link to="/addcrop">
-          <button className="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded">
-            Add Crop
+    <div className="p-4 shadow-xl relative">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-2">
+        <h2 className="text-2xl font-bold text-gray-700">Crop Tracker</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setOpenAdd(true)}
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-black font-semibold py-2 px-4 rounded"
+          >
+            <FiPlus size={18} />
+            <span>Add Crop</span>
           </button>
-        </Link>
+          <div className="relative text-gray-600">
+            <input
+              type="text"
+              className="border border-gray-300 rounded-lg py-2 px-3 pl-10 focus:outline-none"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400" />
+          </div>
+        </div>
       </div>
+
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 border">Crop Type</th>
-              <th className="px-4 py-2 border">Variety</th>
-              <th className="px-4 py-2 border">Growth Stage</th>
-              <th className="px-4 py-2 border">Amount Sown</th>
-              <th className="px-4 py-2 border">Extra Notes</th>
-              <th className="px-4 py-2 border">Location</th>
-              <th className="px-4 py-2 border">Actions</th>
+        <table className="w-full text-left whitespace-no-wrap">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-3 font-medium text-gray-600 text-sm uppercase">
+                Crop Type
+              </th>
+              <th className="px-4 py-3 font-medium text-gray-600 text-sm uppercase">
+                Variety
+              </th>
+              <th className="px-4 py-3 font-medium text-gray-600 text-sm uppercase">
+                Growth Stage
+              </th>
+              <th className="px-4 py-3 font-medium text-gray-600 text-sm uppercase">
+                Amount Sown
+              </th>
+              <th className="px-4 py-3 font-medium text-gray-600 text-sm uppercase">
+                Extra Notes
+              </th>
+              <th className="px-4 py-3 font-medium text-gray-600 text-sm uppercase">
+                Location
+              </th>
+              <th className="px-4 py-3 font-medium text-gray-600 text-sm uppercase">
+                Actions
+              </th>
             </tr>
           </thead>
-          <tbody>
-            {crops.map((crop) => (
-              <tr key={crop.id} className="border-t text-center">
-                <td className="px-4 py-2 border">{crop.crop_type}</td>
-                <td className="px-4 py-2 border">{crop.variety}</td>
-                <td className="px-4 py-2 border">{crop.growth_stage}</td>
-                <td className="px-4 py-2 border">{crop.amount_sown}</td>
-                <td className="px-4 py-2 border">{crop.extra_notes}</td>
-                <td className="px-4 py-2 border">{crop.location}</td>
-                <td className="px-4 py-2 border">
-                  <button
-                    className="bg-blue-500 hover:bg-blue-600 text-black font-bold py-1 px-2 rounded mr-2"
-                    onClick={() => handleEdit(crop.id)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red-500 hover:bg-red-600 text-black font-bold py-1 px-2 rounded"
-                    onClick={() => handleDelete(crop.id)}
-                  >
-                    Delete
-                  </button>
+          <tbody className="divide-y divide-gray-100 text-gray-700">
+            {filteredCrops.map((crop) => (
+              <tr key={crop.id} className="hover:bg-gray-50">
+                <td className="px-4 py-3">{crop.crop_type}</td>
+                <td className="px-4 py-3">{crop.variety}</td>
+                <td className="px-4 py-3">{crop.growth_stage}</td>
+                <td className="px-4 py-3">{crop.amount_sown}</td>
+                <td className="px-4 py-3">{crop.extra_notes}</td>
+                <td className="px-4 py-3">{crop.location}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleEditClick(crop)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <FiEdit size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(crop.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <FiTrash2 size={18} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
-            {crops.length === 0 && (
+            {filteredCrops.length === 0 && (
               <tr>
-                <td colSpan={7} className="text-center py-4">
+                <td colSpan={7} className="text-center py-4 text-gray-500">
                   No crops found.
                 </td>
               </tr>
@@ -122,6 +161,29 @@ const CropTable: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Render the Add Crop modal */}
+      {openAdd && (
+        <AddCrop open={openAdd} setOpen={setOpenAdd} onCropAdded={fetchCrops} />
+      )}
+
+      {/* Render the Edit Crop modal */}
+      {openEdit && editCrop && (
+        <EditCrop
+          open={openEdit}
+          setOpen={setOpenEdit}
+          cropId={editCrop.id}
+          initialData={{
+            crop_type: editCrop.crop_type,
+            variety: editCrop.variety,
+            growth_stage: editCrop.growth_stage,
+            amount_sown: editCrop.amount_sown,
+            extra_notes: editCrop.extra_notes,
+            location: editCrop.location,
+          }}
+          onCropEdited={fetchCrops}
+        />
+      )}
     </div>
   );
 };

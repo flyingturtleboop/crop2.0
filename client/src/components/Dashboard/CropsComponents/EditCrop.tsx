@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 interface CropData {
@@ -10,30 +10,28 @@ interface CropData {
   location: string;
 }
 
-interface AddCropProps {
+interface EditCropProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onCropAdded?: () => void;
+  cropId: string;
+  initialData: CropData;
+  onCropEdited?: () => void;
 }
 
-const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
-  const [formData, setFormData] = useState<CropData>({
-    crop_type: '',
-    variety: '',
-    growth_stage: '',
-    amount_sown: 0,
-    extra_notes: '',
-    location: '',
-  });
+const EditCrop: React.FC<EditCropProps> = ({ open, setOpen, cropId, initialData, onCropEdited }) => {
+  const [formData, setFormData] = useState<CropData>(initialData);
   const [error, setError] = useState<string | null>(null);
+
+  // When the initial data changes (or modal opens), update the form state.
+  useEffect(() => {
+    setFormData(initialData);
+  }, [initialData]);
 
   if (!open) return null;
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: name === 'amount_sown' ? Number(value) : value,
     }));
@@ -43,16 +41,16 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://127.0.0.1:5000/crops', formData, {
+      await axios.put(`http://127.0.0.1:5000/crops/${cropId}`, formData, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       setOpen(false);
-      if (onCropAdded) {
-        onCropAdded();
+      if (onCropEdited) {
+        onCropEdited();
       }
     } catch (err: any) {
-      console.error("Error adding crop:", err);
-      setError("Failed to add crop");
+      console.error("Error editing crop:", err);
+      setError("Failed to edit crop");
     }
   };
 
@@ -66,9 +64,10 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
       <div className="fixed inset-0 bg-black opacity-50" onClick={handleCancel}></div>
       {/* Modal content */}
       <div className="relative bg-white rounded-lg p-6 w-full max-w-lg z-10">
-        <h2 className="text-2xl font-bold mb-4">Add New Crop</h2>
+        <h2 className="text-2xl font-bold mb-4">Edit Crop</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
+          {/* Crop Type */}
           <div className="mb-4">
             <label htmlFor="crop_type" className="block mb-1 font-semibold">
               Crop Type
@@ -83,6 +82,7 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
               required
             />
           </div>
+          {/* Variety */}
           <div className="mb-4">
             <label htmlFor="variety" className="block mb-1 font-semibold">
               Variety
@@ -97,6 +97,7 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
               required
             />
           </div>
+          {/* Growth Stage */}
           <div className="mb-4">
             <label htmlFor="growth_stage" className="block mb-1 font-semibold">
               Growth Stage
@@ -111,6 +112,7 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
               required
             />
           </div>
+          {/* Amount Sown */}
           <div className="mb-4">
             <label htmlFor="amount_sown" className="block mb-1 font-semibold">
               Amount Sown
@@ -125,6 +127,7 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
               required
             />
           </div>
+          {/* Extra Notes */}
           <div className="mb-4">
             <label htmlFor="extra_notes" className="block mb-1 font-semibold">
               Extra Notes
@@ -136,8 +139,9 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
               onChange={handleChange}
               className="w-full border border-gray-300 rounded p-2"
               rows={3}
-            />
+            ></textarea>
           </div>
+          {/* Location */}
           <div className="mb-4">
             <label htmlFor="location" className="block mb-1 font-semibold">
               Location
@@ -156,15 +160,15 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
             <button
               type="button"
               onClick={handleCancel}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 shadow-sm font-bold py-2 px-4 rounded"
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-green-500 hover:bg-green-600 text-black shadow-sm font-bold py-2 px-4 rounded"
+              className="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded"
             >
-              Add Crop
+              Save Changes
             </button>
           </div>
         </form>
@@ -173,4 +177,4 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
   );
 };
 
-export default AddCrop;
+export default EditCrop;
