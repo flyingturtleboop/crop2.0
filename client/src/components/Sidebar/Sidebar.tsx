@@ -1,13 +1,17 @@
 import React from 'react'
-import {AccountToggle} from './AccountToggle'
-import {RouteSelect} from './RouteSelect'
+import { AccountToggle } from './AccountToggle'
+import { RouteSelect } from './RouteSelect'
 
-const Sidebar = () => {
+interface SidebarProps {
+  removeToken: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ removeToken }) => {
   return (
     <div>
-      <div className="overflow-y-scroll sticky top-4 h-[calc(100vh-32px-48px)]">
-        <AccountToggle />
-        <RouteSelect/>
+      <div className="overflow sticky top-4 h-[calc(100vh-32px-48px)]">
+        <AccountToggle removeToken={removeToken} />
+        <RouteSelect />
       </div>
     </div>
   )

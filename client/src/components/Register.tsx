@@ -48,7 +48,7 @@ const Register: React.FC<RegisterProps> = ({ setToken }) => {
           .then((loginResponse) => {
             setToken(loginResponse.data.access_token);
             localStorage.setItem("email", registerForm.email);
-            navigate("/profile");
+            navigate("/dashboard");
             setTimeout(() => {
               alert("Registration Successful and Logged In");
             }, 100);

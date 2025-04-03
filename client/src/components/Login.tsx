@@ -30,7 +30,7 @@ const Login: React.FC<LoginProps> = ({ setToken }) => {
       .then((response) => {
         setToken(response.data.access_token);
         localStorage.setItem("email", loginForm.email);
-        navigate("/profile");
+        navigate("/dashboard");
         setTimeout(() => {
           alert("Successfully Login");
         }, 100);

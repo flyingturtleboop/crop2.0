@@ -3,10 +3,10 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
 interface HeaderProps {
-  token: () => void;
+  removeToken: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ token }) => {
+const Header: React.FC<HeaderProps> = ({ removeToken }) => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
@@ -14,14 +14,16 @@ const Header: React.FC<HeaderProps> = ({ token }) => {
     axios
       .post("http://127.0.0.1:5000/logout")
       .then(() => {
-        token();
+        removeToken();
         localStorage.removeItem("email");
         navigate("/");
       })
       .catch((error: any) => {
-        if (error.response) {
-          console.log(error.response);
-        }
+        console.error("Logout error:", error);
+        // Even if the API call fails, we should still remove the token
+        removeToken();
+        localStorage.removeItem("email");
+        navigate("/");
       });
   }
 
@@ -44,6 +46,11 @@ const Header: React.FC<HeaderProps> = ({ token }) => {
             <Link to="/" className="text-xl text-gray-700 hover:text-gray-900">
               Home
             </Link>
+            {logged && (
+              <Link to="/profile" className="text-xl text-gray-700 hover:text-gray-900">
+                Profile
+              </Link>
+            )}
           </div>
           {/* Right Side Controls */}
           <div className="flex items-center">
@@ -100,6 +107,17 @@ const Header: React.FC<HeaderProps> = ({ token }) => {
                 Home
               </Link>
             </li>
+            {logged && (
+              <li>
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 text-gray-700 hover:bg-gray-200 rounded"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+              </li>
+            )}
             {!logged ? (
               <li>
                 <Link

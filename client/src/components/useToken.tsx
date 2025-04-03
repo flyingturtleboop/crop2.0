@@ -1,37 +1,33 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-interface UseTokenReturn {
-  token: string | null;
+interface TokenInterface {
   setToken: (userToken: string) => void;
+  token: string | null;
   removeToken: () => void;
 }
 
-function useToken(): UseTokenReturn {
-  // Retrieve the token from localStorage, or return null if not found
+function useToken(): TokenInterface {
   function getToken(): string | null {
-    const userToken = localStorage.getItem("token");
-    return userToken;
+    const userToken = localStorage.getItem('token'); 
+    return userToken || null;
   }
 
-  // Set up state for the token (string or null)
-  const [token, setTokenState] = useState<string | null>(getToken());
+  const [token, setToken] = useState<string | null>(getToken());
 
-  // Save a new token to localStorage and update state
   function saveToken(userToken: string): void {
-    localStorage.setItem("token", userToken);
-    setTokenState(userToken);
+    localStorage.setItem('token', userToken);
+    setToken(userToken);
   }
 
-  // Remove token from localStorage and reset state
   function removeToken(): void {
     localStorage.removeItem("token");
-    setTokenState(null);
+    setToken(null);
   }
 
   return {
-    token,
     setToken: saveToken,
-    removeToken,
+    token,
+    removeToken
   };
 }
 
