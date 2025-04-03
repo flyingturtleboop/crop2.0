@@ -1,12 +1,19 @@
-const Crops = () => {
-    return (
-      <div className="bg-white rounded-lg pb-4 shadow p-4">
-        <p className="text-gray-700">
-          Welcome to the Crops page! Manage and track your crop data here.
-        </p>
-      </div>
-    );
-  };
-  
-  export default Crops;
-  
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import CropTable from './CropsComponents/CropTable';
+import AddCrop from './CropsComponents/AddCrop';
+
+const Crops: React.FC = () => {
+  return (
+    <Routes>
+      {/* Default route shows the crop table */}
+      <Route index element={<CropTable />} />
+      {/* The "add" route displays the AddCrop modal */}
+      <Route path="add" element={<AddCrop />} />
+      {/* Fallback: show crop table */}
+      <Route path="*" element={<CropTable />} />
+    </Routes>
+  );
+};
+
+export default Crops;
