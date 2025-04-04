@@ -13,7 +13,6 @@ class User(db.Model):
     email = db.Column(db.String(150), unique=True)
     password = db.Column(db.Text, nullable=False)
     occupation = db.Column(db.Text, nullable=False)
-    location = db.Column(db.Text, nullable=False)
     # Add relationship to crops
     crops = db.relationship('Crop', backref='owner', lazy=True, cascade="all, delete-orphan")
 
