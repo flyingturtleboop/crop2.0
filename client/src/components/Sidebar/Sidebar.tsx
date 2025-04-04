@@ -11,16 +11,16 @@ const Sidebar: React.FC<SidebarProps> = ({ removeToken }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="relative h-screen flex">
+        <div className="relative h-screen flex">
       {/* Sidebar container with border */}
       <div
         className={`bg-white border-r transition-all duration-200 ${
-          collapsed ? "w-14" : "w-80"
+          collapsed ? "w-10" : "w-[28rem]" 
         }`}
       >
-        <div className="overflow-y-auto h-full">
+        <div className="overflow-y-scroll sticky top-4 h-[calc(100vh-32px-48px)] ">
           <AccountToggle collapsed={collapsed} removeToken={removeToken} />
-          <RouteSelect collapsed={collapsed} />
+          <RouteSelect />
         </div>
       </div>
 

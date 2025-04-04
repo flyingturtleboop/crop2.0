@@ -5,7 +5,7 @@ import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 interface AccountToggleProps {
   removeToken: () => void;
-  collapsed: boolean; // ← for hiding name/email
+  collapsed: boolean; 
 }
 
 interface UserProfile {

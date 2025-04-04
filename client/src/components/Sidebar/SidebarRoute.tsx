@@ -20,7 +20,7 @@ const SidebarRoute: React.FC<SidebarRouteProps> = ({
         ${selected ? "bg-green-100 text-green-800 font-semibold" : "hover:bg-stone-200 text-stone-500"}`}
     >
       <span className={selected ? "text-green-600" : "text-gray-400"}>
-        <Icon size={18} />
+        <Icon size={20} />
       </span>
 
       {/* Hide title when collapsed */}
