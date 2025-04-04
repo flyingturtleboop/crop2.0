@@ -5,6 +5,7 @@ import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 interface AccountToggleProps {
   removeToken: () => void;
+  collapsed: boolean; 
 }
 
 interface UserProfile {
@@ -14,7 +15,10 @@ interface UserProfile {
   occupation: string;
 }
 
-export const AccountToggle: React.FC<AccountToggleProps> = ({ removeToken }) => {
+export const AccountToggle: React.FC<AccountToggleProps> = ({
+  removeToken,
+  collapsed,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
@@ -22,7 +26,6 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({ removeToken }) => 
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 
   useEffect(() => {
-    // Retrieve email and token from localStorage (or your state management)
     const email = localStorage.getItem("email");
     const token = localStorage.getItem("token");
 
@@ -62,36 +65,47 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({ removeToken }) => 
         onClick={toggleDropdown}
         className="flex p-0.5 hover:bg-stone-200 rounded transition-colors relative gap-2 w-full items-center"
       >
+        {/* Always show avatar */}
         <img
           src="https://api.dicebear.com/9.x/notionists/svg"
           alt="avatar"
           className="w-8 h-8 rounded shrink-0 bg-green-500 shadow"
         />
-        <div className="text-start">
-          <span className="text-sm font-bold block">
-            {profile ? profile.name : "Loading..."}
-          </span>
-          <span className="text-xs block text-stone-500">
-            {profile ? profile.email : "Loading..."}
-          </span>
-        </div>
-        {isOpen ? (
-          <FiChevronUp className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs" />
-        ) : (
-          <FiChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs" />
+
+        {/* Hide name/email if collapsed */}
+        {!collapsed && (
+          <div className="text-start">
+            <span className="text-sm font-bold block">
+              {profile ? profile.name : "Loading..."}
+            </span>
+            <span className="text-xs block text-stone-500">
+              {profile ? profile.email : "Loading..."}
+            </span>
+          </div>
+        )}
+
+        {/* Hide chevron if collapsed */}
+        {!collapsed && (
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs">
+            {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+          </div>
         )}
       </button>
-      <div
-        className="overflow-hidden transition-all duration-300"
-        style={{ maxHeight: isOpen ? "50px" : "0px" }}
-      >
-        <button
-          onClick={logMeOut}
-          className="flex p-2 hover:bg-stone-200 rounded transition-colors w-full text-left"
+
+      {/* Hide the logout dropdown if collapsed */}
+      {!collapsed && (
+        <div
+          className="overflow-hidden transition-all duration-300"
+          style={{ maxHeight: isOpen ? "50px" : "0px" }}
         >
-          <span className="text-sm font-bold block">Logout</span>
-        </button>
-      </div>
+          <button
+            onClick={logMeOut}
+            className="flex p-2 hover:bg-stone-200 rounded transition-colors w-full text-left"
+          >
+            <span className="text-sm font-bold block">Logout</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
