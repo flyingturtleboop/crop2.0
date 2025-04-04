@@ -7,25 +7,25 @@ from flask_jwt_extended import (
 )
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-from models import db, User, Crop
- 
+from models import db, User, Crop, Finance  # Import the Finance model
+
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
- 
+
 app.config['SECRET_KEY'] = 'fduinaslfndajfnsdiaofbdjhiofbdsoi'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flaskdb.db'
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 jwt = JWTManager(app)
- 
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
- 
+
 bcrypt = Bcrypt(app)    
 db.init_app(app)
   
 with app.app_context():
     db.create_all()
- 
+
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
@@ -312,5 +312,76 @@ def delete_crop(crop_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
  
+# -----------------------------
+# Finance Tracker CRUD Endpoints
+# -----------------------------
+
+@app.route('/finances', methods=["POST"])
+@jwt_required()
+def create_finance():
+    try:
+        data = request.json
+        
+        # Validate required fields
+        required_fields = ["amount", "currency", "status"]
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"error": f"{field} is required"}), 400
+        
+        # Validate and convert amount to float
+        try:
+            amount = float(data.get("amount"))
+        except (ValueError, TypeError):
+            return jsonify({"error": "amount must be a valid number"}), 400
+        
+        # Ensure status is either "Received" or "Sent"
+        if data.get("status").lower() not in ["received", "sent"]:
+            return jsonify({"error": "status must be either 'Received' or 'Sent'"}), 400
+
+        finance = Finance(
+            amount=amount,
+            currency=data.get("currency"),
+            status=data.get("status"),
+            notes=data.get("notes", "")
+            # total and timestamp are automatically handled by the model
+        )
+        
+        db.session.add(finance)
+        db.session.commit()
+        return jsonify({
+            "id": finance.id,
+            "amount": finance.amount,
+            "currency": finance.currency,
+            "status": finance.status,
+            "notes": finance.notes,
+            "total": finance.total,
+            "timestamp": finance.timestamp.isoformat()
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/finances', methods=["GET"])
+@jwt_required()
+def get_finances():
+    try:
+        finances = Finance.query.order_by(Finance.timestamp.desc()).all()
+        result = []
+        for finance in finances:
+            result.append({
+                "id": finance.id,
+                "amount": finance.amount,
+                "currency": finance.currency,
+                "status": finance.status,
+                "notes": finance.notes,
+                "total": finance.total,
+                "timestamp": finance.timestamp.isoformat()
+            })
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ... (rest of your endpoints and app.run block)
+
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)

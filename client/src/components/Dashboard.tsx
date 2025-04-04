@@ -24,7 +24,7 @@ const Dashboard: React.FC<DashboardProps> = ({ removeToken }) => {
         <Routes>
           {/* Default nested route: Dashboard_main */}
           <Route index element={<Dashboard_main />} />
-          <Route path="finances" element={<Finances />} />
+          <Route path="finances/" element={<Finances />} />
           <Route path="crops/" element={<Crops />} />
           <Route path="analysis" element={<Analysis />} />
           <Route path="maps" element={<Maps />} />
