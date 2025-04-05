@@ -6,6 +6,7 @@ import Finances from './Dashboard/Finances';
 import Crops from './Dashboard/Crops';
 import Analysis from './Dashboard/Analysis';
 import Settings from './Dashboard/Settings';
+import Maps from './Dashboard/Maps';
 
 interface DashboardProps {
   removeToken: () => void;
@@ -20,14 +21,14 @@ const Dashboard: React.FC<DashboardProps> = ({ removeToken }) => {
       </aside>
 
       {/* Main content area: switches based on nested routes */}
-      <main className="ml-64 flex-1 p-8 w-full">
+      <main className="ml-64 flex-1 py-8 px-0 w-full">
         <Routes>
           {/* Default nested route: Dashboard_main */}
           <Route index element={<Dashboard_main />} />
           <Route path="finances/" element={<Finances />} />
           <Route path="crops/" element={<Crops />} />
           <Route path="analysis" element={<Analysis />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="maps" element={<Maps />} />
           {/* Fallback: if no match, render Dashboard_main */}
           <Route path="*" element={<Dashboard_main />} />
         </Routes>
