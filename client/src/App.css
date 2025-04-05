@@ -1,3 +1,4 @@
+/* Existing styles for root, logo, and animations */
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -42,3 +43,162 @@
 }
 
 @import "tailwindcss";
+/* New Styles for FAQ Chatbot */
+
+/* FAQ Button */
+.faq-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.faq-button:hover {
+  background-color: #2563eb;
+}
+
+/* FAQ Modal */
+.faq-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.faq-modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Modal Header */
+.faq-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn {
+  background-color: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Chatbox Styling */
+.faq-chat-box {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-bubble {
+  background-color: #f1f1f1;
+  border-radius: 12px;
+  padding: 10px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.chat-bubble.user {
+  background-color: #3b82f6;
+  color: white;
+  align-self: flex-end;
+}
+
+.chat-bubble.bot {
+  background-color: #e4e4e7;
+  color: #333;
+  align-self: flex-start;
+}
+
+/* Input Section */
+.chat-input-container {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  background-color: #fafafa;
+}
+
+.chat-input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+}
+
+.chat-input:focus {
+  border-color: #3b82f6;
+}
+
+.chat-submit {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.chat-submit:hover {
+  background-color: #2563eb;
+}
+
+/* FAQ List */
+.faq-list {
+  margin-top: 20px;
+}
+
+.faq-item {
+  margin-bottom: 10px;
+}
+
+.faq-question {
+  background-color: #f1f1f1;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.faq-answer {
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  margin-top: 5px;
+}
+
+.faq-question:hover {
+  background-color: #e4e4e7;
+}
+
+.faq-item:hover .faq-question {
+  background-color: #e4e4e7;
+}

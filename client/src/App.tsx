@@ -7,6 +7,8 @@ import {
   Navigate,
   useLocation,
 } from 'react-router-dom';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 import Landing from './components/Landing';
 import Login from './components/Login';
@@ -14,6 +16,10 @@ import Header from './components/Header';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import useToken from './components/useToken';
+
+
+
+
 
 const AppContent: React.FC<{
   token: string | null;
