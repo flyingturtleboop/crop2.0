@@ -7,8 +7,7 @@ import {
   Navigate,
   useLocation,
 } from 'react-router-dom';
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
+
 
 import Landing from './components/Landing';
 import Login from './components/Login';
