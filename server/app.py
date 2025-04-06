@@ -1,5 +1,7 @@
+# app.py
 import json
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify, send_from_directory
 from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import (
     create_access_token, get_jwt, get_jwt_identity, unset_jwt_cookies, 
@@ -7,10 +9,21 @@ from flask_jwt_extended import (
 )
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-from models import db, User, Crop, Finance  # Import the Finance model
+from werkzeug.utils import secure_filename
+from models import db, User, Crop, Finance, get_uuid
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
+
+# --- File Upload Configuration ---
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 app.config['SECRET_KEY'] = 'fduinaslfndajfnsdiaofbdjhiofbdsoi'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flaskdb.db'
@@ -20,37 +33,32 @@ jwt = JWTManager(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
-bcrypt = Bcrypt(app)    
+bcrypt = Bcrypt(app)
 db.init_app(app)
-  
+
 with app.app_context():
     db.create_all()
+
+# Serve uploaded files
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
- 
+
 @app.route('/logintoken', methods=["POST"])
 def create_token():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
-    
     if not email or not password:
         return jsonify({"error": "Email and password are required"}), 400
-  
     user = User.query.filter_by(email=email).first()
-    if user is None:
+    if user is None or not bcrypt.check_password_hash(user.password, password):
         return jsonify({"error": "Wrong email or password"}), 401
-      
-    if not bcrypt.check_password_hash(user.password, password):
-        return jsonify({"error": "Wrong email or password"}), 401
-      
     access_token = create_access_token(identity=email)
-  
-    return jsonify({
-        "email": email,
-        "access_token": access_token
-    })
+    return jsonify({"email": email, "access_token": access_token})
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -59,32 +67,19 @@ def signup():
         email = request.json.get("email")
         password = request.json.get("password")
         occupation = request.json.get("occupation")
-        
         if not name or not email or not password or not occupation:
             return jsonify({"error": "Name, email, password, and occupation are required"}), 400
-   
-        user_exists = User.query.filter_by(email=email).first() is not None
-        name_exists = User.query.filter_by(name=name).first() is not None
-   
-        if user_exists:
-            return jsonify({"error": "Email already exists"}), 409
-            
-        if name_exists:
-            return jsonify({"error": "Username already exists"}), 409
-           
+        if User.query.filter_by(email=email).first() or User.query.filter_by(name=name).first():
+            return jsonify({"error": "Email or username already exists"}), 409
         hashed_password = bcrypt.generate_password_hash(password)
         new_user = User(name=name, email=email, password=hashed_password, occupation=occupation)
         db.session.add(new_user)
         db.session.commit()
-   
-        return jsonify({
-            "id": new_user.id,
-            "email": new_user.email
-        })
+        return jsonify({"id": new_user.id, "email": new_user.email})
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-     
+
 @app.after_request
 def refresh_expiring_jwts(response):
     try:
@@ -94,42 +89,35 @@ def refresh_expiring_jwts(response):
         if target_timestamp > exp_timestamp:
             access_token = create_access_token(identity=get_jwt_identity())
             data = response.get_json()
-            if type(data) is dict:
-                data["access_token"] = access_token 
+            if isinstance(data, dict):
+                data["access_token"] = access_token
                 response.data = json.dumps(data)
         return response
     except (RuntimeError, KeyError):
         return response
-     
+
 @app.route("/logout", methods=["POST"])
 def logout():
     response = jsonify({"msg": "logout successful"})
     unset_jwt_cookies(response)
     return response
-     
+
 @app.route('/profile/<getemail>')
-@jwt_required() 
+@jwt_required()
 def my_profile(getemail):
     current_user = get_jwt_identity()
     if current_user != getemail:
         return jsonify({"error": "Unauthorized Access"}), 403
-       
     user = User.query.filter_by(email=getemail).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
-  
-    response_body = {
+    return jsonify({
         "id": user.id,
         "name": user.name,
         "email": user.email,
         "occupation": user.occupation
-    }
-  
-    return response_body
+    })
 
-# ----------------------------
-# Helper Function for Current User
-# ----------------------------
 def get_current_user():
     email = get_jwt_identity()
     return User.query.filter_by(email=email).first()
@@ -142,22 +130,26 @@ def get_current_user():
 @jwt_required()
 def create_crop():
     try:
-        data = request.json
+        data = request.form if request.content_type.startswith("multipart/form-data") else request.json
         current_user = get_current_user()
-        
         if not current_user:
             return jsonify({"error": "User not found"}), 404
-        
         required_fields = ["crop_type", "variety", "growth_stage", "amount_sown", "location"]
         for field in required_fields:
             if not data.get(field):
                 return jsonify({"error": f"{field} is required"}), 400
-            
         try:
             amount_sown = float(data.get("amount_sown"))
         except (ValueError, TypeError):
             return jsonify({"error": "amount_sown must be a valid number"}), 400
-            
+        crop_image_path = None
+        if 'crop_image' in request.files:
+            file = request.files['crop_image']
+            if file and allowed_file(file.filename):
+                filename = get_uuid() + "_" + secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
+                crop_image_path = filepath
         crop = Crop(
             crop_type=data.get("crop_type"),
             variety=data.get("variety"),
@@ -165,7 +157,8 @@ def create_crop():
             amount_sown=amount_sown,
             extra_notes=data.get("extra_notes", ""),
             location=data.get("location"),
-            user_id=current_user.id
+            user_id=current_user.id,
+            crop_image=crop_image_path
         )
         db.session.add(crop)
         db.session.commit()
@@ -176,7 +169,8 @@ def create_crop():
             "growth_stage": crop.growth_stage,
             "amount_sown": crop.amount_sown,
             "extra_notes": crop.extra_notes,
-            "location": crop.location
+            "location": crop.location,
+            "crop_image": (request.host_url.rstrip("/") + "/" + crop.crop_image) if crop.crop_image else None
         }), 201
     except Exception as e:
         db.session.rollback()
@@ -189,7 +183,6 @@ def get_crops():
         current_user = get_current_user()
         if not current_user:
             return jsonify({"error": "User not found"}), 404
-            
         crops = Crop.query.filter_by(user_id=current_user.id).all()
         result = []
         for crop in crops:
@@ -200,7 +193,8 @@ def get_crops():
                 "growth_stage": crop.growth_stage,
                 "amount_sown": crop.amount_sown,
                 "extra_notes": crop.extra_notes,
-                "location": crop.location
+                "location": crop.location,
+                "crop_image": (request.host_url.rstrip("/") + "/" + crop.crop_image) if crop.crop_image else None
             })
         return jsonify(result)
     except Exception as e:
@@ -213,14 +207,11 @@ def get_crop(crop_id):
         current_user = get_current_user()
         if not current_user:
             return jsonify({"error": "User not found"}), 404
-            
         crop = Crop.query.get(crop_id)
         if crop is None:
             return jsonify({"error": "Crop not found"}), 404
-            
         if crop.user_id != current_user.id:
             return jsonify({"error": "Unauthorized access"}), 403
-            
         return jsonify({
             "id": crop.id,
             "crop_type": crop.crop_type,
@@ -228,7 +219,8 @@ def get_crop(crop_id):
             "growth_stage": crop.growth_stage,
             "amount_sown": crop.amount_sown,
             "extra_notes": crop.extra_notes,
-            "location": crop.location
+            "location": crop.location,
+            "crop_image": (request.host_url.rstrip("/") + "/" + crop.crop_image) if crop.crop_image else None
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -240,15 +232,12 @@ def update_crop(crop_id):
         current_user = get_current_user()
         if not current_user:
             return jsonify({"error": "User not found"}), 404
-            
         crop = Crop.query.get(crop_id)
         if crop is None:
             return jsonify({"error": "Crop not found"}), 404
-            
         if crop.user_id != current_user.id:
             return jsonify({"error": "Unauthorized access"}), 403
-            
-        data = request.json
+        data = request.form if request.content_type.startswith("multipart/form-data") else request.json
         if "crop_type" in data:
             crop.crop_type = data["crop_type"]
         if "variety" in data:
@@ -264,7 +253,13 @@ def update_crop(crop_id):
             crop.extra_notes = data["extra_notes"]
         if "location" in data:
             crop.location = data["location"]
-            
+        if 'crop_image' in request.files:
+            file = request.files['crop_image']
+            if file and allowed_file(file.filename):
+                filename = get_uuid() + "_" + secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
+                crop.crop_image = filepath
         db.session.commit()
         return jsonify({
             "id": crop.id,
@@ -273,7 +268,8 @@ def update_crop(crop_id):
             "growth_stage": crop.growth_stage,
             "amount_sown": crop.amount_sown,
             "extra_notes": crop.extra_notes,
-            "location": crop.location
+            "location": crop.location,
+            "crop_image": (request.host_url.rstrip("/") + "/" + crop.crop_image) if crop.crop_image else None
         })
     except Exception as e:
         db.session.rollback()
@@ -286,21 +282,18 @@ def delete_crop(crop_id):
         current_user = get_current_user()
         if not current_user:
             return jsonify({"error": "User not found"}), 404
-            
         crop = Crop.query.get(crop_id)
         if crop is None:
             return jsonify({"error": "Crop not found"}), 404
-            
         if crop.user_id != current_user.id:
             return jsonify({"error": "Unauthorized access"}), 403
-            
         db.session.delete(crop)
         db.session.commit()
         return jsonify({"msg": "Crop deleted successfully"})
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
- 
+
 # -----------------------------
 # Finance Tracker CRUD Endpoints
 # -----------------------------
@@ -309,32 +302,36 @@ def delete_crop(crop_id):
 @jwt_required()
 def create_finance():
     try:
-        data = request.json
+        data = request.form if request.content_type.startswith("multipart/form-data") else request.json
         required_fields = ["amount", "currency", "status"]
         for field in required_fields:
             if not data.get(field):
                 return jsonify({"error": f"{field} is required"}), 400
-        
         try:
             amount = float(data.get("amount"))
         except (ValueError, TypeError):
             return jsonify({"error": "amount must be a valid number"}), 400
-        
         if data.get("status").lower() not in ["received", "sent"]:
             return jsonify({"error": "status must be either 'Received' or 'Sent'"}), 400
-
         current_user = get_current_user()
         if not current_user:
             return jsonify({"error": "User not found"}), 404
-
+        receipt_image_path = None
+        if 'receipt_image' in request.files:
+            file = request.files['receipt_image']
+            if file and allowed_file(file.filename):
+                filename = get_uuid() + "_" + secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
+                receipt_image_path = filepath
         finance = Finance(
             amount=amount,
             currency=data.get("currency"),
             status=data.get("status"),
             notes=data.get("notes", ""),
-            user_id=current_user.id  # Associate finance record with the current user
+            user_id=current_user.id,
+            receipt_image=receipt_image_path
         )
-        
         db.session.add(finance)
         db.session.commit()
         return jsonify({
@@ -343,6 +340,7 @@ def create_finance():
             "currency": finance.currency,
             "status": finance.status,
             "notes": finance.notes,
+            "receipt_image": (request.host_url.rstrip("/") + "/" + finance.receipt_image) if finance.receipt_image else None,
             "total": finance.total,
             "timestamp": finance.timestamp.isoformat()
         }), 201
@@ -366,11 +364,79 @@ def get_finances():
                 "currency": finance.currency,
                 "status": finance.status,
                 "notes": finance.notes,
+                "receipt_image": (request.host_url.rstrip("/") + "/" + finance.receipt_image) if finance.receipt_image else None,
                 "total": finance.total,
                 "timestamp": finance.timestamp.isoformat()
             })
         return jsonify(result)
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/finances/<finance_id>', methods=["PUT"])
+@jwt_required()
+def update_finance(finance_id):
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({"error": "User not found"}), 404
+        finance = Finance.query.get(finance_id)
+        if finance is None:
+            return jsonify({"error": "Finance record not found"}), 404
+        if finance.user_id != current_user.id:
+            return jsonify({"error": "Unauthorized access"}), 403
+        data = request.form if request.content_type.startswith("multipart/form-data") else request.json
+        if "amount" in data:
+            try:
+                finance.amount = float(data["amount"])
+            except (ValueError, TypeError):
+                return jsonify({"error": "amount must be a valid number"}), 400
+        if "currency" in data:
+            finance.currency = data["currency"]
+        if "status" in data:
+            if data["status"].lower() not in ["received", "sent"]:
+                return jsonify({"error": "status must be either 'Received' or 'Sent'"}), 400
+            finance.status = data["status"]
+        if "notes" in data:
+            finance.notes = data["notes"]
+        if 'receipt_image' in request.files:
+            file = request.files['receipt_image']
+            if file and allowed_file(file.filename):
+                filename = get_uuid() + "_" + secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
+                finance.receipt_image = filepath
+        db.session.commit()
+        return jsonify({
+            "id": finance.id,
+            "amount": finance.amount,
+            "currency": finance.currency,
+            "status": finance.status,
+            "notes": finance.notes,
+            "receipt_image": (request.host_url.rstrip("/") + "/" + finance.receipt_image) if finance.receipt_image else None,
+            "total": finance.total,
+            "timestamp": finance.timestamp.isoformat()
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/finances/<finance_id>', methods=["DELETE"])
+@jwt_required()
+def delete_finance(finance_id):
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({"error": "User not found"}), 404
+        finance = Finance.query.get(finance_id)
+        if finance is None:
+            return jsonify({"error": "Finance record not found"}), 404
+        if finance.user_id != current_user.id:
+            return jsonify({"error": "Unauthorized access"}), 403
+        db.session.delete(finance)
+        db.session.commit()
+        return jsonify({"msg": "Finance record deleted successfully"})
+    except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
