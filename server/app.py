@@ -60,7 +60,6 @@ def signup():
         password = request.json.get("password")
         occupation = request.json.get("occupation")
         
-        # Validate required fields
         if not name or not email or not password or not occupation:
             return jsonify({"error": "Name, email, password, and occupation are required"}), 400
    
@@ -85,7 +84,7 @@ def signup():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
- 
+     
 @app.after_request
 def refresh_expiring_jwts(response):
     try:
@@ -101,17 +100,16 @@ def refresh_expiring_jwts(response):
         return response
     except (RuntimeError, KeyError):
         return response
- 
+     
 @app.route("/logout", methods=["POST"])
 def logout():
     response = jsonify({"msg": "logout successful"})
     unset_jwt_cookies(response)
     return response
- 
+     
 @app.route('/profile/<getemail>')
 @jwt_required() 
 def my_profile(getemail):
-    # Verify that the requesting user can only access their own profile
     current_user = get_jwt_identity()
     if current_user != getemail:
         return jsonify({"error": "Unauthorized Access"}), 403
@@ -130,13 +128,15 @@ def my_profile(getemail):
     return response_body
 
 # ----------------------------
-# Crop Tracker CRUD Endpoints
+# Helper Function for Current User
 # ----------------------------
-
-# Helper function to get current user
 def get_current_user():
     email = get_jwt_identity()
     return User.query.filter_by(email=email).first()
+
+# ----------------------------
+# Crop Tracker CRUD Endpoints
+# ----------------------------
 
 @app.route('/crops', methods=["POST"])
 @jwt_required()
@@ -148,13 +148,11 @@ def create_crop():
         if not current_user:
             return jsonify({"error": "User not found"}), 404
         
-        # Validate required fields
         required_fields = ["crop_type", "variety", "growth_stage", "amount_sown", "location"]
         for field in required_fields:
             if not data.get(field):
                 return jsonify({"error": f"{field} is required"}), 400
             
-        # Try to convert amount_sown to float
         try:
             amount_sown = float(data.get("amount_sown"))
         except (ValueError, TypeError):
@@ -167,7 +165,7 @@ def create_crop():
             amount_sown=amount_sown,
             extra_notes=data.get("extra_notes", ""),
             location=data.get("location"),
-            user_id=current_user.id  # Associate crop with current user
+            user_id=current_user.id
         )
         db.session.add(crop)
         db.session.commit()
@@ -192,7 +190,6 @@ def get_crops():
         if not current_user:
             return jsonify({"error": "User not found"}), 404
             
-        # Filter crops by the current user's ID
         crops = Crop.query.filter_by(user_id=current_user.id).all()
         result = []
         for crop in crops:
@@ -221,7 +218,6 @@ def get_crop(crop_id):
         if crop is None:
             return jsonify({"error": "Crop not found"}), 404
             
-        # Check if the crop belongs to the current user
         if crop.user_id != current_user.id:
             return jsonify({"error": "Unauthorized access"}), 403
             
@@ -249,27 +245,21 @@ def update_crop(crop_id):
         if crop is None:
             return jsonify({"error": "Crop not found"}), 404
             
-        # Check if the crop belongs to the current user
         if crop.user_id != current_user.id:
             return jsonify({"error": "Unauthorized access"}), 403
             
         data = request.json
-        
-        # Update fields if provided
         if "crop_type" in data:
             crop.crop_type = data["crop_type"]
         if "variety" in data:
             crop.variety = data["variety"]
         if "growth_stage" in data:
             crop.growth_stage = data["growth_stage"]
-            
-        # Handle amount_sown specially since it needs to be a float
         if "amount_sown" in data:
             try:
                 crop.amount_sown = float(data["amount_sown"])
             except (ValueError, TypeError):
                 return jsonify({"error": "amount_sown must be a valid number"}), 400
-                
         if "extra_notes" in data:
             crop.extra_notes = data["extra_notes"]
         if "location" in data:
@@ -301,7 +291,6 @@ def delete_crop(crop_id):
         if crop is None:
             return jsonify({"error": "Crop not found"}), 404
             
-        # Check if the crop belongs to the current user
         if crop.user_id != current_user.id:
             return jsonify({"error": "Unauthorized access"}), 403
             
@@ -321,29 +310,29 @@ def delete_crop(crop_id):
 def create_finance():
     try:
         data = request.json
-        
-        # Validate required fields
         required_fields = ["amount", "currency", "status"]
         for field in required_fields:
             if not data.get(field):
                 return jsonify({"error": f"{field} is required"}), 400
         
-        # Validate and convert amount to float
         try:
             amount = float(data.get("amount"))
         except (ValueError, TypeError):
             return jsonify({"error": "amount must be a valid number"}), 400
         
-        # Ensure status is either "Received" or "Sent"
         if data.get("status").lower() not in ["received", "sent"]:
             return jsonify({"error": "status must be either 'Received' or 'Sent'"}), 400
+
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({"error": "User not found"}), 404
 
         finance = Finance(
             amount=amount,
             currency=data.get("currency"),
             status=data.get("status"),
-            notes=data.get("notes", "")
-            # total and timestamp are automatically handled by the model
+            notes=data.get("notes", ""),
+            user_id=current_user.id  # Associate finance record with the current user
         )
         
         db.session.add(finance)
@@ -365,7 +354,10 @@ def create_finance():
 @jwt_required()
 def get_finances():
     try:
-        finances = Finance.query.order_by(Finance.timestamp.desc()).all()
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({"error": "User not found"}), 404
+        finances = Finance.query.filter_by(user_id=current_user.id).order_by(Finance.timestamp.desc()).all()
         result = []
         for finance in finances:
             result.append({
@@ -380,8 +372,6 @@ def get_finances():
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-# ... (rest of your endpoints and app.run block)
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)
