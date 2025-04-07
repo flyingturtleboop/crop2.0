@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom';
 
 
-import Landing from './components/Landing';
+import Landing from './components/LandingPage/Landing';
 import Login from './components/Login';
 import Header from './components/Header';
 import Register from './components/Register';
