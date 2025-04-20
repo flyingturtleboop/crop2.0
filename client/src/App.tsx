@@ -37,7 +37,6 @@ const AppContent: React.FC<{
           <Routes>
             {/* The entire dashboard page (with sidebar + main content) */}
             <Route path="/dashboard/*" element={<Dashboard removeToken={removeToken} />} />
-            {/* Fallback: redirect unmatched authenticated routes to /dashboard */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         ) : (

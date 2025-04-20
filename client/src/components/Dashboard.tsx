@@ -1,35 +1,45 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Sidebar from './Sidebar/Sidebar';
-import Dashboard_main from './Dashboard/Dashboard_main';
-import Finances from './Dashboard/Finances';
-import Crops from './Dashboard/Crops';
-import Analysis from './Dashboard/Analysis';
-import Settings from './Dashboard/Settings';
-import Maps from './Dashboard/Maps';
+// src/components/Dashboard.tsx
+import React, { useState } from "react";
+import { Routes, Route } from "react-router-dom";
+import Sidebar from "./Sidebar/Sidebar";
+import Dashboard_main from "./Dashboard/Dashboard_main";
+import Finances from "./Dashboard/Finances";
+import Crops from "./Dashboard/Crops";
+import Analysis from "./Dashboard/Analysis";
+import Maps from "./Dashboard/Maps";
+import SettingsPage from "./Dashboard/SettingsPage";
 
 interface DashboardProps {
   removeToken: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ removeToken }) => {
+  // 1) Lift collapse-state here
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar: remains stationary */}
-      <aside className="w-64 h-screen fixed top-0 left-0 bg-white p-4">
-        <Sidebar removeToken={removeToken} />
-      </aside>
+      {/* 2) Pass collapse-state & setter into Sidebar */}
+      <Sidebar
+        removeToken={removeToken}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+      />
 
-      {/* Main content area: switches based on nested routes */}
-      <main className="ml-64 flex-1 py-8 px-0 w-full">
+      {/* 3) Shift your main content left margin */}
+      <main
+        className={`
+          transition-all duration-300 ease-in-out
+          ${collapsed ? "ml-16" : "ml-64"} p-8 flex-1
+        `}
+      >
         <Routes>
-          {/* Default nested route: Dashboard_main */}
           <Route index element={<Dashboard_main />} />
-          <Route path="finances/" element={<Finances />} />
-          <Route path="crops/" element={<Crops />} />
+          <Route path="finances" element={<Finances />} />
+          <Route path="crops" element={<Crops />} />
           <Route path="analysis" element={<Analysis />} />
           <Route path="maps" element={<Maps />} />
-          {/* Fallback: if no match, render Dashboard_main */}
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Dashboard_main />} />
         </Routes>
       </main>

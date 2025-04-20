@@ -1,64 +1,20 @@
+// src/components/Sidebar/RouteSelect.tsx
 import React from "react";
-import { NavLink } from "react-router-dom";
-import { IconType } from "react-icons";
-import {FiDollarSign, FiHome, FiBarChart, FiMapPin } from "react-icons/fi";
-import {PiPlant} from "react-icons/pi";
+import { FiDollarSign, FiHome, FiBarChart, FiMapPin, FiSettings } from "react-icons/fi";
+import { PiPlant } from "react-icons/pi";
+import { SidebarRoute } from "./SidebarRoute";
 
-export const RouteSelect = () => {
-  return (
-    <div className="space-y-1">
-      <SidebarRoute 
-        Icon={FiHome} 
-        to="/dashboard" 
-        title="Dashboard" 
-      />
-      <SidebarRoute 
-        Icon={FiDollarSign} 
-        to="/dashboard/finances" 
-        title="Finances" 
-      />
-      <SidebarRoute 
-        Icon={PiPlant} 
-        to="/dashboard/crops" 
-        title="Crops" 
-      />
-      <SidebarRoute 
-        Icon={FiBarChart} 
-        to="/dashboard/analysis" 
-        title="Analysis" 
-      />
-      <SidebarRoute 
-        Icon={FiMapPin} 
-        to="/dashboard/maps" 
-        title="Maps" 
-      />
-    </div>
-  );
-};
-
-interface SidebarRouteProps {
-  Icon: IconType;
-  title: string;
-  to: string;
+interface RouteSelectProps {
+  collapsed: boolean;
 }
 
-const SidebarRoute: React.FC<SidebarRouteProps> = ({ Icon, title, to }) => {
-  return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        `flex items-center justify-start gap-2 w-full rounded px-3 py-2 text-sm transition-colors ring-0 outline-none focus:outline-none focus:ring-0 ${
-          isActive
-            ? "bg-gray-100 text-green-800 font-bold"
-            : "hover:bg-stone-200 bg-transparent text-stone-500"
-        }`
-      }
-      end
-    >
-      <span className="text-gray-400">
-        <Icon size={18} />
-      </span>
-      <span>{title}</span>
-    </NavLink>
-  );
-};
+export const RouteSelect: React.FC<RouteSelectProps> = ({ collapsed }) => (
+  <div className="space-y-1">
+    <SidebarRoute Icon={FiHome}     to="/dashboard"         title="Dashboard" collapsed={collapsed} />
+    <SidebarRoute Icon={FiDollarSign}to="/dashboard/finances" title="Finances"  collapsed={collapsed} />
+    <SidebarRoute Icon={PiPlant}     to="/dashboard/crops"    title="Crops"     collapsed={collapsed} />
+    <SidebarRoute Icon={FiBarChart}  to="/dashboard/analysis" title="Analysis"  collapsed={collapsed} />
+    <SidebarRoute Icon={FiMapPin}    to="/dashboard/maps"     title="Maps"      collapsed={collapsed} />
+    <SidebarRoute Icon={FiSettings}  to="/dashboard/settings" title="Settings"  collapsed={collapsed} />
+  </div>
+);

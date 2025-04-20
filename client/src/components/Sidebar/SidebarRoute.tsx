@@ -1,32 +1,39 @@
+// src/components/Sidebar/SidebarRoute.tsx
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { IconType } from "react-icons";
 
-interface SidebarRouteProps {
+export interface SidebarRouteProps {
   Icon: IconType;
   title: string;
-  selected: boolean;
-  collapsed: boolean; 
+  to: string;
+  collapsed: boolean;
 }
 
-const SidebarRoute: React.FC<SidebarRouteProps> = ({
-  selected,
+export const SidebarRoute: React.FC<SidebarRouteProps> = ({
   Icon,
   title,
-  collapsed
+  to,
+  collapsed,
 }) => {
-  return (
-    <button
-      className={`flex items-center justify-start gap-2 w-full rounded px-3 py-2 text-sm transition-colors
-        ${selected ? "bg-green-100 text-green-800 font-semibold" : "hover:bg-stone-200 text-stone-500"}`}
-    >
-      <span className={selected ? "text-green-600" : "text-gray-400"}>
-        <Icon size={20} />
-      </span>
+  // choose a larger icon size
+  const size = collapsed ? 24 : 18;
 
-      {/* Hide title when collapsed */}
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `flex items-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
+          isActive
+            ? "bg-gray-100 text-green-800 font-bold"
+            : "hover:bg-stone-200 text-stone-500"
+        } ${collapsed ? "justify-center" : "justify-start"}`
+      }
+      end
+    >
+      <Icon size={size} />
+      {/* only render the label when not collapsed */}
       {!collapsed && <span>{title}</span>}
-    </button>
+    </NavLink>
   );
 };
-
-export default SidebarRoute;
