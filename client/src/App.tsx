@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom';
 
 
-import Landing from './components/Landing';
+import Landing from './components/LandingPage/Landing';
 import Login from './components/Login';
 import Header from './components/Header';
 import Register from './components/Register';
@@ -37,7 +37,6 @@ const AppContent: React.FC<{
           <Routes>
             {/* The entire dashboard page (with sidebar + main content) */}
             <Route path="/dashboard/*" element={<Dashboard removeToken={removeToken} />} />
-            {/* Fallback: redirect unmatched authenticated routes to /dashboard */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         ) : (

@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ removeToken }) => {
   };
 
   return (
-    <nav className="bg-gray-200 shadow-xl fixed top-0 left-0 w-full z-50">
+    <nav className="bg-white-200 shadow-xl fixed top-0 left-0 w-full z-50">
       <div className="px-4">
         <div className="flex items-center justify-between h-16">
           {/* Brand */}

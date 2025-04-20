@@ -1,45 +1,48 @@
-import React, { useState } from "react";
+// src/components/Sidebar/Sidebar.tsx
+import React from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { AccountToggle } from "./AccountToggle";
 import { RouteSelect } from "./RouteSelect";
 
-interface SidebarProps {
+export interface SidebarProps {
   removeToken: () => void;
+  collapsed: boolean;
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ removeToken }) => {
-  const [collapsed, setCollapsed] = useState(false);
-
+const Sidebar: React.FC<SidebarProps> = ({
+  removeToken,
+  collapsed,
+  setCollapsed,
+}) => {
   return (
-        <div className="relative h-screen flex">
-      {/* Sidebar container with border */}
-      <div
-        className={`bg-white border-r transition-all duration-200 ${
-          collapsed ? "w-10" : "w-[28rem]" 
-        }`}
-      >
-        <div className="overflow-y-scroll sticky top-4 h-[calc(100vh-32px-48px)] ">
-          <AccountToggle collapsed={collapsed} removeToken={removeToken} />
-          <RouteSelect />
-        </div>
-      </div>
+    <aside
+      className={`
+        fixed top-0 left-0 h-full bg-white border-r
+        transition-all duration-300 ease-in-out
+        ${collapsed ? "w-16" : "w-64"}
+      `}
+    >
+      <div className="flex flex-col h-full">
+        <AccountToggle collapsed={collapsed} removeToken={removeToken} />
 
-      {/* Collapse/Expand Button with transition on left position */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute top-0 text-gray-500 hover:text-green-600 transition-all duration-100"
-        style={{
-          left: collapsed ? "4rem" : "15rem",
-        }}
-      >
-        {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
-      </button>
+        <nav className="flex-1 overflow-y-auto">
+          <RouteSelect collapsed={collapsed} />
+        </nav>
 
-      {/* Main content area */}
-      <div className="flex-1">
-        {/* Your main content goes here */}
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          className={`"p-5 m-1 rounded hover:bg-stone-200 self-end transition-colors"
+          ${collapsed ? 'ml-10' : 'ml-auto'} `}
+        >
+          {collapsed ? (
+            <FiChevronRight size={20} />
+          ) : (
+            <FiChevronLeft size={20} />
+          )}
+        </button>
       </div>
-    </div>
+    </aside>
   );
 };
 

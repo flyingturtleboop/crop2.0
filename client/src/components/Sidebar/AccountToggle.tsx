@@ -1,3 +1,4 @@
+// src/components/Sidebar/AccountToggle.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -5,7 +6,7 @@ import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 interface AccountToggleProps {
   removeToken: () => void;
-  collapsed: boolean; 
+  collapsed: boolean;
 }
 
 interface UserProfile {
@@ -23,86 +24,72 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
 
-  const toggleDropdown = () => setIsOpen((prev) => !prev);
-
   useEffect(() => {
     const email = localStorage.getItem("email");
     const token = localStorage.getItem("token");
-
-    if (email && token) {
-      axios
-        .get(`http://127.0.0.1:5000/profile/${email}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          setProfile(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching profile:", error);
-        });
-    }
+    if (!email || !token) return;
+    axios
+      .get(`http://127.0.0.1:5000/profile/${email}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((r) => setProfile(r.data))
+      .catch(console.error);
   }, []);
 
-  function logMeOut(): void {
-    axios
-      .post("http://127.0.0.1:5000/logout")
-      .then(() => {
-        removeToken();
-        localStorage.removeItem("email");
-        localStorage.removeItem("token");
-        navigate("/");
-      })
-      .catch((error: any) => {
-        if (error.response) {
-          console.error(error.response);
-        }
-      });
-  }
+  const toggleDropdown = () => setIsOpen((o) => !o);
+  const logOut = () => {
+    axios.post("http://127.0.0.1:5000/logout").finally(() => {
+      removeToken();
+      localStorage.removeItem("email");
+      localStorage.removeItem("token");
+      navigate("/");
+    });
+  };
 
   return (
-    <div className="border-b mb-4 mt-2 pb-4 border-stone-300">
+    <div className="border-b border-stone-300 mb-4">
       <button
         onClick={toggleDropdown}
-        className="flex p-0.5 hover:bg-stone-200 rounded transition-colors relative gap-2 w-full items-center"
+        className="w-full flex items-center justify-between px-3 py-2 hover:bg-stone-200 rounded transition"
       >
-        {/* Always show avatar */}
-        <img
-          src="https://api.dicebear.com/9.x/notionists/svg"
-          alt="avatar"
-          className="w-8 h-8 rounded shrink-0 bg-green-500 shadow"
-        />
-
-        {/* Hide name/email if collapsed */}
-        {!collapsed && (
-          <div className="text-start">
-            <span className="text-sm font-bold block">
-              {profile ? profile.name : "Loading..."}
-            </span>
-            <span className="text-xs block text-stone-500">
-              {profile ? profile.email : "Loading..."}
-            </span>
-          </div>
-        )}
-
-        {/* Hide chevron if collapsed */}
-        {!collapsed && (
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs">
-            {isOpen ? <FiChevronUp /> : <FiChevronDown />}
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          <img
+            src="https://api.dicebear.com/9.x/notionists/svg"
+            alt="avatar"
+            className="w-8 h-8 rounded bg-green-500 shadow"
+          />
+          {/* hide text if sidebar is collapsed */}
+          {!collapsed && (
+            <div className="text-left">
+              <div className="font-semibold text-sm">
+                {profile?.name ?? "Loading..."}
+              </div>
+              <div className="text-xs text-stone-500">
+                {profile?.email ?? ""}
+              </div>
+            </div>
+          )}
+        </div>
+        {/* chevron always on the right if not collapsed */}
+        {!collapsed &&
+          (isOpen ? (
+            <FiChevronUp className="text-stone-500" />
+          ) : (
+            <FiChevronDown className="text-stone-500" />
+          ))}
       </button>
 
-      {/* Hide the logout dropdown if collapsed */}
+      {/* dropdown menu */}
       {!collapsed && (
         <div
-          className="overflow-hidden transition-all duration-300"
-          style={{ maxHeight: isOpen ? "50px" : "0px" }}
+          className="overflow-hidden transition-[max-height] duration-300"
+          style={{ maxHeight: isOpen ? "100px" : "0px" }}
         >
           <button
-            onClick={logMeOut}
-            className="flex p-2 hover:bg-stone-200 rounded transition-colors w-full text-left"
+            onClick={logOut}
+            className="w-full text-left px-4 py-2 hover:bg-stone-200 transition rounded-b"
           >
-            <span className="text-sm font-bold block">Logout</span>
+            Logout
           </button>
         </div>
       )}
