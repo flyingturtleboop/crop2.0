@@ -5,7 +5,6 @@ import AboutSection from "./AboutSection";
 const Layout: React.FC = () => {
   return (
     <div className="w-full"> 
-      <HeroSection />
       <AboutSection />
       {/* Add additional sections below */}
     </div>

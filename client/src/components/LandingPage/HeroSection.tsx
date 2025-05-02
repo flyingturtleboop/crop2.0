@@ -8,10 +8,7 @@ const HeroSection: React.FC = () => {
   return (
     <section className="relative w-full h-screen overflow-hidden">
       {/* Background image filling this hero section only */}
-      <div
-        className="fixed top-16 left-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-        style={{ backgroundImage: "url('/intro_img1.png')" }}
-      />
+
       {/* Dark overlay on top of the image */}
       <div className="fixed top-16 left-0 w-full h-[calc(100vh-4rem)] inset-0 bg-black/40" />
 

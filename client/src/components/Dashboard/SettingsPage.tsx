@@ -1,15 +1,18 @@
-// src/pages/SettingsPage.tsx
-import React from "react";
-import Profile from "../Dashboard/Settings/Profile";
-import Notifications from "../Dashboard/Settings/Notification";
+"use client";
+import ProfileSection from "../Dashboard/Settings/ProfileSection";
+import NotificationsSection from "../Dashboard/Settings/NotificationsSection";
+import DangerZoneSection from "../Dashboard/Settings/DangerZoneSection";
 
-const SettingsPage: React.FC = () => (
-  <div className="flex-1 overflow-auto relative z-10 bg-gray-900">
-    <main className="max-w-4xl mx-auto py-6 px-4 lg:px-8">
-      <Profile />
-      <Notifications />
-    </main>
-  </div>
-);
+export default function SettingsPage() {
+  return (
+    <div className="p-10 flex flex-col items-start space-y-10 min-h-screen bg-gray-50">
+      <h1 className="text-4xl font-bold mb-12">Settings</h1>
 
-export default SettingsPage;
+      <div className="flex flex-col gap-10 w-full">
+        <ProfileSection />
+        <NotificationsSection />
+        <DangerZoneSection />
+      </div>
+    </div>
+  );
+}
