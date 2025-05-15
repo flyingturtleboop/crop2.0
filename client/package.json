@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/google.maps": "^3.58.1",
     "@types/node": "^22.14.0",
     "@types/react": "^19.0.10",
     "@types/react-calendar": "^3.9.0",
