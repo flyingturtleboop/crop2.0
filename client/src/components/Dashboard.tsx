@@ -8,6 +8,7 @@ import Crops from "./Dashboard/Crops";
 import Analysis from "./Dashboard/Analysis";
 import Maps from "./Dashboard/Maps";
 import SettingsPage from "./Dashboard/SettingsPage";
+import Calendar from "./Dashboard/Calendar"; // Import the Calendar component
 
 interface DashboardProps {
   removeToken: () => void;
@@ -40,6 +41,7 @@ const Dashboard: React.FC<DashboardProps> = ({ removeToken }) => {
           <Route path="analysis" element={<Analysis />} />
           <Route path="maps" element={<Maps />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="calendar" element={<Calendar />} /> {/* Add Calendar route */}
           <Route path="*" element={<Dashboard_main />} />
         </Routes>
       </main>

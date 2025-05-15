@@ -119,7 +119,7 @@
 
 /* CropBot (Bot) Message Styling (Green and Bold) */
 .chat-bubble.cropbot-message {
-  color: #16a34a;
+  color: #0ed156;
   font-weight: bold;
   align-self: flex-start;
 }
@@ -292,9 +292,12 @@
 }
 
 .chat-bubble.user {
-  background-color: #dcf8c6;
+  background-color: #065f46; /* Dark green */
+  color: white;
   align-self: flex-end;
 }
+
+
 
 .chat-bubble.cropbot-message {
   background-color: #f1f1f1;
@@ -368,4 +371,152 @@
   cursor: pointer;
   border: none;
   background: transparent;
+}
+
+/* ───────────────────────────────────────────
+   Calendar & Form Pane Layout Tweaks
+──────────────────────────────────────────── */
+
+/* 1. Make left pane (calendar) take up more width */
+.calendar-pane {
+  flex: 4;               /* 4 parts out of total 5 (4 + 1) */
+}
+
+/* 2. Keep right pane (form) at 1 part */
+.form-pane {
+  flex: 1;               /* 1 part out of total 5 */
+  padding: 1.5rem;       /* reduce padding slightly */
+}
+
+/* 3. Allow the form buttons to wrap instead of overflow */
+.form-buttons {
+  display: flex;
+  flex-wrap: wrap;       /* wrap to new line if needed */
+  gap: 0.25rem;          /* tighten up the gap */
+}
+
+/* 4. Let each button shrink & wrap its text */
+.btn {
+  flex: 1 1 0;           /* grow, shrink, zero base width */
+  min-width: 0;          /* allow to shrink below its content width */
+  white-space: normal;   /* allow multi-line labels */
+  padding: 8px;          /* slightly smaller padding */
+  font-size: 0.9rem;     /* reduce font-size so labels fit */
+}
+
+/* 5. (Optional) If you have extra white space at top/bottom */
+.calendar-pane,
+.form-pane {
+  min-height: 0;         /* prevent overflow in flex children */
+}
+
+/* 6. Ensure the calendar itself fills its container */
+.react-calendar {
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+}
+
+/* Add Reminder (and “Add Another”) buttons — green */
+.btn.success {
+  background-color: #10b981;    /* emerald-500 */
+  color: white;
+}
+.btn.success:hover {
+  background-color: #059669;    /* emerald-600 */
+}
+
+/* Update Reminder button — blue */
+.btn.update {
+  background-color: #3b82f6;    /* blue-500 */
+  color: white;
+}
+.btn.update:hover {
+  background-color: #2563eb;    /* blue-600 */
+}
+
+/* Delete button — red */
+.btn.danger {
+  background-color: #ef4444;    /* red-500 */
+  color: white;
+}
+.btn.danger:hover {
+  background-color: #dc2626;    /* red-600 */
+}
+
+.existing-reminder {
+  border: 2px solid #3b82f6;      /* full blue outline */
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background-color: #ffffff;
+  transition: background-color 0.2s;
+}
+
+.existing-reminder.selected {
+  background-color: #eff6ff;      /* light blue when active */
+}
+
+/* shade the input box */
+.reminder-input {
+  background-color: #f3f4f6;    /* light gray fill */
+  border: 1px solid #d1d5db;    /* soft gray border */
+  border-radius: 6px;
+  padding: 10px;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+/* highlight on focus so it's obvious */
+.reminder-input:focus {
+  background-color: #ffffff;                          /* white when typing */
+  border-color: #3b82f6;                              /* matching your blue theme */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);       /* blue glow */
+  outline: none;
+}
+
+.tile-reminder {
+  background-color: #4caf50;
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  
+  /* PILL / CIRCLE SHAPE */
+  border-radius: 9999px;
+  
+  /* OUTLINE */
+  border: 2px solid rgba(255,255,255,0.8);
+}
+
+/* Make the user-input textarea a bit taller */
+.reminder-input {
+  /* keep full width */
+  width: 100% !important;
+  /* bump up the minimum height */
+  min-height: 6rem;    /* ≈96px; increase or decrease to taste */
+  /* preserve padding & border */
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: none;
+  box-sizing: border-box;
+}
+
+/* If you want it to expand to fill leftover space in the form-pane */
+.form-pane {
+  display: flex;
+  flex-direction: column;
+}
+.form-pane .existing-reminders + .reminder-input {
+  /* allow the textarea to grow */
+  flex-grow: 1;
+}
+
+/* Add a bit more breathing room between the input box and buttons */
+.reminder-input {
+  margin-bottom: 1rem;  /* space below textarea */
+}
+
+.form-buttons {
+  margin-top: 0.5rem;   /* extra space above buttons */
 }

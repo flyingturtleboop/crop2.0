@@ -2,6 +2,7 @@
 import React from "react";
 import { FiDollarSign, FiHome, FiBarChart, FiMapPin, FiSettings } from "react-icons/fi";
 import { PiPlant } from "react-icons/pi";
+import { FaCalendarAlt } from "react-icons/fa"; // Import calendar icon from Font Awesome
 import { SidebarRoute } from "./SidebarRoute";
 
 interface RouteSelectProps {
@@ -16,5 +17,6 @@ export const RouteSelect: React.FC<RouteSelectProps> = ({ collapsed }) => (
     <SidebarRoute Icon={FiBarChart}  to="/dashboard/analysis" title="Analysis"  collapsed={collapsed} />
     <SidebarRoute Icon={FiMapPin}    to="/dashboard/maps"     title="Maps"      collapsed={collapsed} />
     <SidebarRoute Icon={FiSettings}  to="/dashboard/settings" title="Settings"  collapsed={collapsed} />
+    <SidebarRoute Icon={FaCalendarAlt} to="/dashboard/calendar" title="Calendar"  collapsed={collapsed} /> {/* Use FaCalendarAlt for Calendar */}
   </div>
 );

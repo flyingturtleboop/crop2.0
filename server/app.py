@@ -10,10 +10,28 @@ from flask_jwt_extended import (
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-from models import db, User, Crop, Finance, get_uuid
+from models import db, User, Crop, Finance, Reminder, get_uuid
+import traceback
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+@app.after_request
+def apply_cors(response):
+    # Allow your Vite origin
+    response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+    # Allow the headers your frontend needs
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    # Allow these HTTP methods
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    # If you ever send cookies, you’d also need this:
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
+
+# If you’re using fetch() with a preflight OPTIONS, you can short-circuit it:
+@app.route("/api/<path:unused>", methods=["OPTIONS"])
+def handle_options(unused):
+    resp = make_response()
+    resp.status_code = 204
+    return resp
 
 # --- File Upload Configuration ---
 UPLOAD_FOLDER = 'uploads'
@@ -438,6 +456,104 @@ def delete_finance(finance_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/reminders', methods=['GET'])
+@jwt_required()
+def get_reminders():
+    try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        items = Reminder.query.filter_by(user_id=user.id).order_by(Reminder.date).all()
+        return jsonify([
+            {'id': r.id, 'date': r.date.isoformat(), 'content': r.content}
+            for r in items
+        ]), 200
+
+    except Exception as e:
+        # Print full traceback to your Flask console
+        traceback.print_exc()
+        # Also send it back in JSON so you can read it in DevTools
+        return jsonify({
+            'error': 'Server error in get_reminders',
+            'details': str(e)
+        }), 500
+
+@app.route('/api/reminders', methods=['POST'])
+@jwt_required()
+def add_reminder():
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    data = request.get_json() or {}
+    date_str = (data.get('date') or "").strip()
+    content  = (data.get('content') or "").strip()
+    if not date_str or not content:
+        return jsonify({'error': 'Missing date or content'}), 400
+
+    try:
+        rem_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'error': 'Invalid date format'}), 400
+
+    rem = Reminder(date=rem_date, content=content, user_id=user.id)
+    db.session.add(rem)
+    db.session.commit()
+
+    return jsonify({
+        'id': rem.id,
+        'date': rem.date.isoformat(),
+        'content': rem.content
+    }), 201
+
+@app.route('/api/reminders/<string:reminder_id>', methods=['PUT'])
+@jwt_required()
+def update_reminder(reminder_id):
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    data = request.get_json() or {}
+    content = (data.get('content') or "").strip()
+    if not content:
+        return jsonify({'error': 'Missing content'}), 400
+
+    rem = Reminder.query.filter_by(id=reminder_id, user_id=user.id).first()
+    if not rem:
+        return jsonify({'error': 'Reminder not found'}), 404
+
+    rem.content = content
+    db.session.commit()
+
+    return jsonify({
+        'id': rem.id,
+        'date': rem.date.isoformat(),
+        'content': rem.content
+    }), 200
+
+@app.route('/api/reminders/<string:reminder_id>', methods=['DELETE'])
+@jwt_required()
+def delete_reminder(reminder_id):
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    rem = Reminder.query.filter_by(id=reminder_id, user_id=user.id).first()
+    if not rem:
+        return jsonify({'error': 'Reminder not found'}), 404
+
+    try:
+        db.session.delete(rem)
+        db.session.commit()
+        return jsonify({'msg': 'Reminder deleted'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Server error in delete_reminder',
+            'details': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)
