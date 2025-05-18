@@ -77,8 +77,14 @@ def update_total(mapper, connection, target):
 
 class Reminder(db.Model):
     __tablename__ = "reminders"
-    id = db.Column(db.String(32), primary_key=True, unique=True, default=get_uuid)
-    date = db.Column(db.Date, nullable=False)  # Stores the reminder's date (no time)
-    content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.String(32), db.ForeignKey("users.id"), nullable=False)
-    user = db.relationship("User", backref=db.backref("reminders", lazy=True, cascade="all, delete-orphan"))
+
+    id          = db.Column(db.String(32),    primary_key=True, unique=True, default=get_uuid)
+    date        = db.Column(db.Date,          nullable=False)              # stores only the date
+    title       = db.Column(db.String(150),   nullable=False)              # new title field
+    description = db.Column(db.Text,          nullable=False)              # new description field
+    user_id     = db.Column(db.String(32),    db.ForeignKey("users.id"), nullable=False)
+
+    user = db.relationship(
+        "User",
+        backref=db.backref("reminders", lazy=True, cascade="all, delete-orphan")
+    )

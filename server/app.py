@@ -512,25 +512,25 @@ def create_plot():
 @app.route('/api/reminders', methods=['GET'])
 @jwt_required()
 def get_reminders():
-    try:
-        user = get_current_user()
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
-        items = Reminder.query.filter_by(user_id=user.id).order_by(Reminder.date).all()
-        return jsonify([
-            {'id': r.id, 'date': r.date.isoformat(), 'content': r.content}
-            for r in items
-        ]), 200
-
-    except Exception as e:
-        # Print full traceback to your Flask console
-        traceback.print_exc()
-        # Also send it back in JSON so you can read it in DevTools
-        return jsonify({
-            'error': 'Server error in get_reminders',
-            'details': str(e)
-        }), 500
+    items = (
+        Reminder.query
+        .filter_by(user_id=user.id)
+        .order_by(Reminder.date)
+        .all()
+    )
+    return jsonify([
+        {
+            'id':          r.id,
+            'date':        r.date.isoformat(),
+            'title':       r.title,
+            'description': r.description
+        }
+        for r in items
+    ]), 200
 
 @app.route('/api/reminders', methods=['POST'])
 @jwt_required()
@@ -540,24 +540,32 @@ def add_reminder():
         return jsonify({'error': 'User not found'}), 404
 
     data = request.get_json() or {}
-    date_str = (data.get('date') or "").strip()
-    content  = (data.get('content') or "").strip()
-    if not date_str or not content:
-        return jsonify({'error': 'Missing date or content'}), 400
+    date_str    = (data.get('date') or "").strip()
+    title       = (data.get('title') or "").strip()
+    description = (data.get('description') or "").strip()
+
+    if not date_str or not title or not description:
+        return jsonify({'error': 'Missing date, title, or description'}), 400
 
     try:
         rem_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
         return jsonify({'error': 'Invalid date format'}), 400
 
-    rem = Reminder(date=rem_date, content=content, user_id=user.id)
+    rem = Reminder(
+        date        = rem_date,
+        title       = title,
+        description = description,
+        user_id     = user.id
+    )
     db.session.add(rem)
     db.session.commit()
 
     return jsonify({
-        'id': rem.id,
-        'date': rem.date.isoformat(),
-        'content': rem.content
+        'id':          rem.id,
+        'date':        rem.date.isoformat(),
+        'title':       rem.title,
+        'description': rem.description
     }), 201
 
 @app.route('/api/reminders/<string:reminder_id>', methods=['PUT'])
@@ -567,22 +575,26 @@ def update_reminder(reminder_id):
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    data = request.get_json() or {}
-    content = (data.get('content') or "").strip()
-    if not content:
-        return jsonify({'error': 'Missing content'}), 400
+    data        = request.get_json() or {}
+    title       = (data.get('title') or "").strip()
+    description = (data.get('description') or "").strip()
+
+    if not title or not description:
+        return jsonify({'error': 'Missing title or description'}), 400
 
     rem = Reminder.query.filter_by(id=reminder_id, user_id=user.id).first()
     if not rem:
         return jsonify({'error': 'Reminder not found'}), 404
 
-    rem.content = content
+    rem.title       = title
+    rem.description = description
     db.session.commit()
 
     return jsonify({
-        'id': rem.id,
-        'date': rem.date.isoformat(),
-        'content': rem.content
+        'id':          rem.id,
+        'date':        rem.date.isoformat(),
+        'title':       rem.title,
+        'description': rem.description
     }), 200
 
 @app.route('/api/reminders/<string:reminder_id>', methods=['DELETE'])
@@ -596,16 +608,9 @@ def delete_reminder(reminder_id):
     if not rem:
         return jsonify({'error': 'Reminder not found'}), 404
 
-    try:
-        db.session.delete(rem)
-        db.session.commit()
-        return jsonify({'msg': 'Reminder deleted'}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({
-            'error': 'Server error in delete_reminder',
-            'details': str(e)
-        }), 500
+    db.session.delete(rem)
+    db.session.commit()
+    return jsonify({'msg': 'Reminder deleted'}), 200
 
 # ─── Run App ─────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
