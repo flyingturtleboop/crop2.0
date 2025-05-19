@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FcGoogle } from "react-icons/fc";
 
 interface RegisterProps {
   setToken: (token: string) => void;
@@ -14,161 +15,109 @@ interface RegisterForm {
 }
 
 const Register: React.FC<RegisterProps> = ({ setToken }) => {
-  const [registerForm, setRegisterForm] = useState<RegisterForm>({
+  const [form, setForm] = useState<RegisterForm>({
     name: "",
     occupation: "",
     email: "",
     password: "",
   });
-
   const navigate = useNavigate();
 
-  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = event.target;
-    setRegisterForm((prev) => ({ ...prev, [name]: value }));
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
 
-  function btnRegister(event: React.MouseEvent<HTMLButtonElement>) {
-    event.preventDefault();
-
-    axios
-      .post("http://127.0.0.1:5000/signup", {
-        name: registerForm.name,
-        occupation: registerForm.occupation,
-        email: registerForm.email,
-        password: registerForm.password,
-      })
-      .then(() => {
-        // Auto login after registration
-        axios
-          .post("http://127.0.0.1:5000/logintoken", {
-            email: registerForm.email,
-            password: registerForm.password,
-          })
-          .then((loginResponse) => {
-            setToken(loginResponse.data.access_token);
-            localStorage.setItem("email", registerForm.email);
-            navigate("/dashboard");
-            setTimeout(() => {
-              alert("Registration Successful and Logged In");
-            }, 100);
-          })
-          .catch((error: any) => {
-            console.error("Auto-login failed:", error);
-            alert(
-              "Registration succeeded but auto-login failed. Please login manually."
-            );
-            navigate("/");
-          });
-      })
-      .catch((error: any) => {
-        if (error.response) {
-          if (error.response.status === 409) {
-            alert("Email already exists");
-          } else {
-            alert("Registration failed. Please try again.");
-          }
-        }
+  const btnRegister = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/signup", form);
+      const { data } = await axios.post("http://localhost:5000/logintoken", {
+        email: form.email,
+        password: form.password,
       });
-
-    setRegisterForm({
-      name: "",
-      occupation: "",
-      email: "",
-      password: "",
-    });
-  }
+      setToken(data.access_token);
+      localStorage.setItem("email", form.email);
+      navigate("/dashboard");
+      alert("Registration successful and logged in");
+    } catch (err: any) {
+      if (err.response?.status === 409) alert("Email already exists");
+      else { console.error(err); alert("Registration failed. Please try again."); }
+    }
+    setForm({ name: "", occupation: "", email: "", password: "" });
+  };
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
         <form>
-          <div className="flex items-center justify-center mb-6">
-            <p className="text-2xl font-semibold">Register Your Account</p>
+          <div className="mb-6 text-center">
+            <p className="text-2xl font-semibold text-black">Register Your Account</p>
           </div>
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              value={registerForm.name}
-              onChange={handleChange}
-              placeholder="Enter your name"
-              className="w-full rounded border border-gray-300 py-2 px-3 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="occupation"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Occupation
-            </label>
-            <input
-              type="text"
-              name="occupation"
-              id="occupation"
-              value={registerForm.occupation}
-              onChange={handleChange}
-              placeholder="Enter your occupation"
-              className="w-full rounded border border-gray-300 py-2 px-3 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Email address
-            </label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              value={registerForm.email}
-              onChange={handleChange}
-              placeholder="Enter a valid email address"
-              className="w-full rounded border border-gray-300 py-2 px-3 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              value={registerForm.password}
-              onChange={handleChange}
-              placeholder="Enter password"
-              className="w-full rounded border border-gray-300 py-2 px-3 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={btnRegister}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-black font-bold py-2 px-4 rounded"
-            >
-              Register
-            </button>
-            <p className="text-sm font-bold mt-2">
-              Already have an account?{" "}
-              <a href="/login" className="text-red-500 hover:underline">
-                Login
-              </a>
-            </p>
-          </div>
+
+          <label className="block mb-2 text-sm text-black">Name</label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            type="text"
+            placeholder="Your name"
+            className="w-full mb-4 p-2 border rounded"
+          />
+
+          <label className="block mb-2 text-sm text-black">Occupation</label>
+          <input
+            name="occupation"
+            value={form.occupation}
+            onChange={handleChange}
+            type="text"
+            placeholder="Your occupation"
+            className="w-full mb-4 p-2 border rounded"
+          />
+
+          <label className="block mb-2 text-sm text-black">Email address</label>
+          <input
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            type="email"
+            placeholder="you@example.com"
+            className="w-full mb-4 p-2 border rounded"
+          />
+
+          <label className="block mb-2 text-sm text-black">Password</label>
+          <input
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            type="password"
+            placeholder="••••••"
+            className="w-full mb-4 p-2 border rounded"
+          />
+
+          <button
+            type="button"
+            onClick={btnRegister}
+            className="w-full mb-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-600"
+          >
+            Register
+          </button>
+
+          <button
+            type="button"
+            onClick={() => (window.location.href = "http://localhost:5000/api/login")}
+            className="w-full flex items-center justify-center py-2 border rounded hover:bg-gray-50"
+          >
+            <FcGoogle className="w-6 h-6 mr-2" />
+            <span className="text-black">Sign in with Google</span>
+          </button>
+
+          <p className="mt-4 text-center text-sm text-black">
+            Already have an account?{" "}
+            <a href="/login" className="text-black hover:underline">
+              Login
+            </a>
+          </p>
         </form>
       </div>
     </div>

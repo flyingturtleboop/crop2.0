@@ -5,3 +5,4 @@ Flask-JWT-Extended
 Flask-Migrate
 Flask-SQLAlchemy
 SQLAlchemy
+Flask-OAuthlib

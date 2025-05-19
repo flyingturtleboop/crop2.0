@@ -16,7 +16,7 @@ export const RouteSelect: React.FC<RouteSelectProps> = ({ collapsed }) => (
     <SidebarRoute Icon={PiPlant}     to="/dashboard/crops"    title="Crops"     collapsed={collapsed} />
     <SidebarRoute Icon={FiBarChart}  to="/dashboard/analysis" title="Analysis"  collapsed={collapsed} />
     <SidebarRoute Icon={FiMapPin}    to="/dashboard/maps"     title="Maps"      collapsed={collapsed} />
-    <SidebarRoute Icon={FiSettings}  to="/dashboard/settings" title="Settings"  collapsed={collapsed} />
     <SidebarRoute Icon={FaCalendarAlt} to="/dashboard/calendar" title="Calendar"  collapsed={collapsed} /> {/* Use FaCalendarAlt for Calendar */}
+    <SidebarRoute Icon={FiSettings}  to="/dashboard/settings" title="Settings"  collapsed={collapsed} />
   </div>
 );
