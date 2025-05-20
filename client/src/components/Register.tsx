@@ -114,7 +114,7 @@ const Register: React.FC<RegisterProps> = ({ setToken }) => {
 
           <p className="mt-4 text-center text-sm text-black">
             Already have an account?{" "}
-            <a href="/login" className="text-black hover:underline">
+            <a href="/login" className="text-green-600 hover:underline">
               Login
             </a>
           </p>
