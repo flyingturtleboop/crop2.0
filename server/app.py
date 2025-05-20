@@ -483,20 +483,33 @@ def get_reminders():
 @app.route('/api/reminders', methods=['POST'])
 @jwt_required()
 def add_reminder():
-    user=get_current_user()
-    if not user: return jsonify({'error':'User not found'}),404
-    data=request.get_json() or {}
-    date_str=(data.get('date')or '').strip()
-    title=(data.get('title')or '').strip()
-    description=(data.get('description')or '').strip()
-    if not date_str or not title or not description: return jsonify({'error':'Missing date, title, or description'}),400
-    try: rem_date=datetime.strptime(date_str,'%Y-%m-%d').date()
-    except ValueError: return jsonify({'error':'Invalid date format'}),400
-    rem=Reminder(date=rem_date(title=title,description=description,user_id=user.id))
-    rem=Reminder(date=rem_date,title=title,description=description,user_id=user.id)
+    user = get_current_user()
+    if not user: return jsonify({'error': 'User not found'}), 404
+    data = request.get_json() or {}
+
+    date_str = (data.get('date') or '').strip()
+    title = (data.get('title') or '').strip()
+    description = (data.get('description') or '').strip()
+
+    if not date_str or not title or not description:
+        return jsonify({'error': 'Missing date, title, or description'}), 400
+
+    try:
+        rem_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'error': 'Invalid date format'}), 400
+
+    rem = Reminder(date=rem_date, title=title, description=description, user_id=user.id)
     db.session.add(rem)
     db.session.commit()
-    return jsonify({'id':rem.id,'date':rem.date.isoformat(),'title':rem.title,'description':rem.description}),201
+
+    return jsonify({
+        'id': rem.id,
+        'date': rem.date.isoformat(),
+        'title': rem.title,
+        'description': rem.description
+    }), 201
+
 
 @app.route('/api/reminders/<string:reminder_id>', methods=['PUT'])
 @jwt_required()
