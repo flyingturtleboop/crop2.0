@@ -50,7 +50,7 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
     <div>
       <button
         onClick={toggleDropdown}
-        className="w-full flex items-center justify-between px-3 py-2 hover:bg-stone-200 rounded transition"
+        className="w-full flex items-center justify-between px-3 py-2 hover:bg-stone-400 rounded transition"
       >
         <div className="flex items-center gap-3">
           <img
