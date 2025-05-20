@@ -6,9 +6,11 @@ from sqlalchemy.orm import Session
 
 db = SQLAlchemy()
 
+# Utility function to generate unique UUIDs
 def get_uuid():
     return uuid4().hex
 
+# User model
 class User(db.Model):
     __tablename__ = "users"
     id        = db.Column(db.String(32), primary_key=True, unique=True, default=get_uuid)
@@ -19,6 +21,7 @@ class User(db.Model):
     crops     = db.relationship('Crop',   backref='owner', lazy=True, cascade="all, delete-orphan")
     finances  = db.relationship('Finance',backref='owner', lazy=True, cascade="all, delete-orphan")
 
+# Crop model
 class Crop(db.Model):
     __tablename__ = "crops"
     id           = db.Column(db.String(32), primary_key=True, unique=True, default=get_uuid)
@@ -27,24 +30,28 @@ class Crop(db.Model):
     growth_stage = db.Column(db.String(100), nullable=False)
     amount_sown  = db.Column(db.Float, nullable=False)
     extra_notes  = db.Column(db.Text)
-    location     = db.Column(db.String(150), nullable=True)    # made optional
-    latitude     = db.Column(db.Float,   nullable=True)       # new
-    longitude    = db.Column(db.Float,   nullable=True)       # new
+    location     = db.Column(db.String(150), nullable=True)
+    latitude     = db.Column(db.Float,   nullable=True)
+    longitude    = db.Column(db.Float,   nullable=True)
     crop_image   = db.Column(db.String(255), nullable=True)
     user_id      = db.Column(db.String(32), db.ForeignKey('users.id'), nullable=False)
 
+    soil_data = db.relationship("SoilData", backref="crop", lazy=True)
+
+# Finance model
 class Finance(db.Model):
     __tablename__ = "finances"
     id            = db.Column(db.String(32), primary_key=True, unique=True, default=get_uuid)
     amount        = db.Column(db.Float, nullable=False)
     currency      = db.Column(db.String(10), nullable=False)
-    status        = db.Column(db.String(10), nullable=False)  # "Received" or "Sent"
+    status        = db.Column(db.String(10), nullable=False)
     notes         = db.Column(db.Text)
     total         = db.Column(db.Float, nullable=False, default=0.0)
     timestamp     = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     receipt_image = db.Column(db.String(255), nullable=True)
     user_id       = db.Column(db.String(32), db.ForeignKey('users.id'), nullable=False)
 
+# CropPlot model
 class CropPlot(db.Model):
     __tablename__ = 'crop_plots'
     id         = db.Column(db.Integer, primary_key=True)
@@ -60,6 +67,7 @@ class CropPlot(db.Model):
             'longitude': self.longitude,
         }
 
+# Finance total calculation before insert
 @event.listens_for(Finance, 'before_insert')
 def update_total(mapper, connection, target):
     sess = Session(bind=connection)
@@ -75,16 +83,36 @@ def update_total(mapper, connection, target):
     else:
         target.total = prev_total
 
+# Reminder model
 class Reminder(db.Model):
     __tablename__ = "reminders"
 
-    id          = db.Column(db.String(32),    primary_key=True, unique=True, default=get_uuid)
-    date        = db.Column(db.Date,          nullable=False)              # stores only the date
-    title       = db.Column(db.String(150),   nullable=False)              # new title field
-    description = db.Column(db.Text,          nullable=False)              # new description field
-    user_id     = db.Column(db.String(32),    db.ForeignKey("users.id"), nullable=False)
+    id          = db.Column(db.String(32), primary_key=True, unique=True, default=get_uuid)
+    date        = db.Column(db.Date, nullable=False)
+    title       = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    user_id     = db.Column(db.String(32), db.ForeignKey("users.id"), nullable=False)
 
     user = db.relationship(
         "User",
         backref=db.backref("reminders", lazy=True, cascade="all, delete-orphan")
     )
+
+# SoilData model to store soil sensor readings
+class SoilData(db.Model):
+    __tablename__ = "soil_data"
+
+    id           = db.Column(db.String(32), primary_key=True, unique=True, default=get_uuid)
+    pH           = db.Column(db.Float, nullable=False)
+    moisture     = db.Column(db.Float, nullable=False)
+    temperature  = db.Column(db.Float, nullable=False)
+    timestamp    = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    location     = db.Column(db.String(150), nullable=True)
+    latitude     = db.Column(db.Float, nullable=True)
+    longitude    = db.Column(db.Float, nullable=True)
+    crop_id      = db.Column(db.String(32), db.ForeignKey('crops.id'), nullable=False)  # Link soil data to crop
+
+    crop = db.relationship("Crop", backref="soil_data", lazy=True)
+
+    def __repr__(self):
+        return f"<SoilData id={self.id}, pH={self.pH}, moisture={self.moisture}, temperature={self.temperature}>"

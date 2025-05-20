@@ -581,6 +581,129 @@ def analyze_leaf():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/soil-data', methods=['POST'])
+@jwt_required()
+def add_soil_data():
+    data = request.json or {}
+    user = get_current_user()  # Get the current user using JWT
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    # Validate required fields in the incoming request
+    for field in ['pH', 'moisture', 'temperature', 'crop_id']:
+        if not data.get(field):
+            return jsonify({'error': f'{field} is required'}), 400
+
+    try:
+        # Add soil data to the database
+        soil_data = SoilData(
+            pH=data['pH'],
+            moisture=data['moisture'],
+            temperature=data['temperature'],
+            location=data.get('location', ''),  # optional field
+            latitude=data.get('latitude'),  # optional field
+            longitude=data.get('longitude'),  # optional field
+            crop_id=data['crop_id']  # link the soil data to the crop
+        )
+        db.session.add(soil_data)
+        db.session.commit()  # Commit the new data to the database
+        return jsonify({
+            'id': soil_data.id,
+            'pH': soil_data.pH,
+            'moisture': soil_data.moisture,
+            'temperature': soil_data.temperature,
+            'location': soil_data.location,
+            'latitude': soil_data.latitude,
+            'longitude': soil_data.longitude,
+            'timestamp': soil_data.timestamp.isoformat()
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()  # Rollback in case of any error
+        return jsonify({'error': str(e)}), 500
+
+
+# API to get soil data for a specific crop
+@app.route('/api/soil-data/<crop_id>', methods=['GET'])
+@jwt_required()
+def get_soil_data(crop_id):
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    # Fetch soil data for the given crop_id
+    soil_data = SoilData.query.filter_by(crop_id=crop_id).all()
+    if not soil_data:
+        return jsonify({'error': 'No soil data found for this crop'}), 404
+
+    result = [{
+        'id': data.id,
+        'pH': data.pH,
+        'moisture': data.moisture,
+        'temperature': data.temperature,
+        'timestamp': data.timestamp.isoformat(),
+        'location': data.location,
+        'latitude': data.latitude,
+        'longitude': data.longitude
+    } for data in soil_data]
+
+    return jsonify(result)
+
+# API to update soil data (optional)
+@app.route('/api/soil-data/<string:soil_id>', methods=['PUT'])
+@jwt_required()
+def update_soil_data(soil_id):
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    soil_data = SoilData.query.get(soil_id)
+    if not soil_data:
+        return jsonify({'error': 'Soil data not found'}), 404
+
+    data = request.json or {}
+
+    for field in ['pH', 'moisture', 'temperature']:
+        if data.get(field):
+            setattr(soil_data, field, data[field])
+
+    if 'location' in data:
+        soil_data.location = data['location']
+    if 'latitude' in data:
+        soil_data.latitude = data['latitude']
+    if 'longitude' in data:
+        soil_data.longitude = data['longitude']
+
+    db.session.commit()
+
+    return jsonify({
+        'id': soil_data.id,
+        'pH': soil_data.pH,
+        'moisture': soil_data.moisture,
+        'temperature': soil_data.temperature,
+        'location': soil_data.location,
+        'latitude': soil_data.latitude,
+        'longitude': soil_data.longitude,
+        'timestamp': soil_data.timestamp.isoformat()
+    })
+
+# API to delete soil data
+@app.route('/api/soil-data/<string:soil_id>', methods=['DELETE'])
+@jwt_required()
+def delete_soil_data(soil_id):
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    soil_data = SoilData.query.get(soil_id)
+    if not soil_data:
+        return jsonify({'error': 'Soil data not found'}), 404
+
+    db.session.delete(soil_data)
+    db.session.commit()
+
+    return jsonify({'msg': 'Soil data deleted successfully'})
+
 # ─── Run App ─────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)
