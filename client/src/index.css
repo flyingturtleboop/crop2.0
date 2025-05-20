@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
+/* ── Base Variables & Reset ───────────────────────────────────────────────── */
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -15,21 +17,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #005C29;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #004D23;
-}
-
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  /* no flex or centering here! */
 }
 
 h1 {
@@ -37,6 +28,17 @@ h1 {
   line-height: 1.1;
 }
 
+/* ── Scoped Link Styles (only inside <main> or your content wrapper) ───────── */
+main a {
+  font-weight: 500;
+  color: #005C29;
+  text-decoration: inherit;
+}
+main a:hover {
+  color: #004D23;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -48,52 +50,42 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
-
 button:hover {
-  border-color: #005C29;
+  border-color: #005c29;
 }
-
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* ── Light Mode Overrides ──────────────────────────────────────────────────── */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
   }
-
-  a:hover {
-    color: #004D23;
-  }
-
+  /* keep link overrides scoped to <main> */
   button {
     background-color: #f9f9f9;
   }
 }
 
-/* Add custom styles for sidebar */
+/* ── Sidebar Custom Classes ────────────────────────────────────────────────── */
 .sidebar-icon {
   @apply text-gray-500;
 }
-
 .sidebar-icon.active {
   @apply text-green-700;
 }
-
 .sidebar-link {
   @apply rounded-md transition-colors;
 }
-
 .sidebar-link:hover .sidebar-icon {
   @apply text-green-700;
 }
-
 .sidebar-link.active {
   @apply bg-green-50;
 }
-
 .sidebar-link.active .sidebar-icon {
   @apply text-green-700;
 }

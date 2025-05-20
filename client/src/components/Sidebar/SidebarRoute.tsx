@@ -18,20 +18,28 @@ export const SidebarRoute: React.FC<SidebarRouteProps> = ({
   return (
     <NavLink
       to={to}
-      className={({ isActive }) => {
-        return `flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-          isActive
-            ? "bg-green-50 text-green-700 font-medium"
-            : "hover:bg-gray-100 text-gray-600"
-        } ${collapsed ? "justify-center" : "justify-start"}`;
-      }}
       end
+      className={({ isActive }) =>
+        `flex items-center gap-3 px-3 py-2 rounded-md transition-all
+         ${isActive ? "bg-white shadow-sm" : "hover:bg-gray-100"}
+         ${collapsed ? "justify-center" : "justify-start"}`
+      }
     >
       {({ isActive }) => (
         <>
-          <Icon size={20} className={isActive ? "text-green-700" : "text-gray-500"} />
-          {/* only render the label when not collapsed */}
-          {!collapsed && <span className="text-sm">{title}</span>}
+          <Icon
+            size={20}
+            className={isActive ? "text-green-700" : "text-gray-600"}
+          />
+          {!collapsed && (
+            <span
+              className={`text-sm ${
+                isActive ? "text-green-700" : "text-gray-600"
+              }`}
+            >
+              {title}
+            </span>
+          )}
         </>
       )}
     </NavLink>

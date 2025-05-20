@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
@@ -22,7 +22,23 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Close on outside click
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
+  // Fetch profile
   useEffect(() => {
     const email = localStorage.getItem("email");
     const token = localStorage.getItem("token");
@@ -35,7 +51,7 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
       .catch(console.error);
   }, []);
 
-  const toggleDropdown = () => setIsOpen((o) => !o);
+  const toggleDropdown = () => setIsOpen((open) => !open);
   const logOut = () => {
     axios.post("http://127.0.0.1:5000/logout").finally(() => {
       removeToken();
@@ -46,45 +62,45 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
   };
 
   return (
-    <div className="p-3 mb-1">
+    <div ref={containerRef} className="px-2 py-2">
       <button
         onClick={toggleDropdown}
-        className="w-full flex items-center justify-between hover:bg-gray-100 rounded-md transition px-2 py-2"
+        className={`flex items-center space-x-3 bg-white rounded-md shadow-sm px-3 py-2 hover:bg-gray-100 transition ease-in-out duration-150 w-full text-left ${
+          collapsed ? "justify-center" : ""
+        }`}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-md bg-purple-600 flex items-center justify-center text-white font-bold">
-            {profile?.name?.charAt(0) || "U"}
-          </div>
-          {/* hide text if sidebar is collapsed */}
-          {!collapsed && (
-            <div className="text-left">
-              <div className="font-medium text-sm text-gray-800">
+        {/* Square avatar with more rounding */}
+        <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center text-white font-semibold text-sm">
+          {profile?.name?.charAt(0) || "U"}
+        </div>
+
+        {!collapsed && (
+          <>
+            <div className="flex-1">
+              <div className="text-sm font-medium text-gray-800">
                 {profile?.name ?? "Loading..."}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 truncate">
                 {profile?.email ?? ""}
               </div>
             </div>
-          )}
-        </div>
-        {/* chevron always on the right if not collapsed */}
-        {!collapsed &&
-          (isOpen ? (
-            <FiChevronUp className="text-gray-500" />
-          ) : (
-            <FiChevronDown className="text-gray-500" />
-          ))}
+            <div className="text-gray-400">
+              {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+            </div>
+          </>
+        )}
       </button>
 
-      {/* dropdown menu */}
+      {/* Slide-down logout */}
       {!collapsed && (
         <div
-          className="overflow-hidden transition-[max-height] duration-300"
-          style={{ maxHeight: isOpen ? "100px" : "0px" }}
+          className={`overflow-hidden transition-[max-height] duration-300 ease-in-out bg-white rounded-md shadow-sm mt-1 ${
+            isOpen ? "max-h-24" : "max-h-0"
+          }`}
         >
           <button
             onClick={logOut}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100 transition rounded-md text-sm text-gray-600"
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
           >
             Logout
           </button>
