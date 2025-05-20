@@ -8,25 +8,48 @@ import { Finance, Crop } from "../Dashboard_main";
 interface GridProps {
   finances: Finance[];
   crops: Crop[];
+  startDate: Date;
+  endDate: Date;
 }
 
-const Grid: React.FC<GridProps> = ({ finances, crops }) => (
-  <>
-    {/* Stat Cards Row */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-      <StatCards finances={finances} />
-    </div>
+const Grid: React.FC<GridProps> = ({
+  finances,
+  crops,
+  startDate,
+  endDate,
+}) => {
+  // Filter finances by the selected date range
+  const filteredFinances = finances.filter((f) => {
+    const d = new Date(f.timestamp);
+    return d >= startDate && d <= endDate;
+  });
 
-    {/* Charts Row */}
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow p-8">
-        <LineGraph finances={finances} />
+  // If Crop items have timestamps, you can filter similarly:
+  // const filteredCrops = crops.filter((c: any) => {
+  //   const d = new Date(c.timestamp);
+  //   return d >= startDate && d <= endDate;
+  // });
+  // Otherwise, show all crops
+  const filteredCrops = crops;
+
+  return (
+    <div className="p-4 w-full">
+      {/* Top row: Stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <StatCards finances={filteredFinances} />
       </div>
-      <div className="bg-white rounded-2xl shadow p-8">
-        <PieChartComponent crops={crops} />
+
+      {/* Bottom row: Line chart and Pie chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow p-6">
+          <LineGraph finances={filteredFinances} />
+        </div>
+        <div className="bg-white rounded-2xl shadow p-6">
+          <PieChartComponent crops={filteredCrops} />
+        </div>
       </div>
     </div>
-  </>
-);
+  );
+};
 
 export default Grid;

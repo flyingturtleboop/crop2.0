@@ -25,7 +25,9 @@ export const LineGraph: React.FC<LineGraphProps> = ({ finances }) => {
 
   return (
     <div className="h-80">
-      <h3 className="text-2xl font-semibold mb-4">Total Revenue Over Past Week</h3>
+      <h3 className="text-xl font-semibold mb-4">
+        Total Revenue Since Start Date
+      </h3>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 24, right: 24, left: 0, bottom: 24 }}>
           <XAxis dataKey="name" axisLine tickLine={false} padding={{ right: 6 }} stroke="#ccc" />
