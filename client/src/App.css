@@ -14,10 +14,15 @@
   z-index: 9999;
   background-color: #4ade80; /* light green */
   color: white;
-  padding: 10px 15px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
   border: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.2s ease-in-out;
 }
 
@@ -217,8 +222,6 @@
 @keyframes fadeIn {
   to { opacity: 1; transform: translateY(0); }
 }
-
-
 
 /* FAQ List Styles */
 .faq-list-container {
