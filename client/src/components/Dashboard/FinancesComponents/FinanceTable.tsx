@@ -1,4 +1,5 @@
-import React, { useEffect, useState, Fragment } from "react";
+// FinanceTable.tsx
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiEdit, FiTrash2, FiSearch, FiPlus } from "react-icons/fi";
 import AddFinance from "./AddFinance";
@@ -75,6 +76,7 @@ const FinanceTable: React.FC = () => {
     setViewModal(true);
   };
 
+  // filter by search term
   const filteredFinances = finances.filter((finance) =>
     finance.currency.toLowerCase().includes(searchTerm.toLowerCase()) ||
     finance.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -102,18 +104,19 @@ const FinanceTable: React.FC = () => {
             <FiPlus size={18} className="text-green-500" />
             Add Finance
           </button>
-          <div className="relative flex items-center">
+          <div className="relative">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Search..."
-              className="border border-gray-300 rounded pl-9 pr-3 py-2 shadow-sm"
+              className="border border-gray-300 rounded pl-10 pr-4 py-2 shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <FiSearch className="absolute left-3 text-gray-400 pointer-events-none" />
           </div>
         </div>
       </div>
+
       <table className="min-w-full border border-gray-300 text-sm shadow-sm">
         <thead className="bg-gray-100">
           <tr>
@@ -130,7 +133,9 @@ const FinanceTable: React.FC = () => {
         <tbody className="bg-white">
           {paginatedFinances.map((finance) => (
             <tr key={finance.id} className="hover:bg-gray-50 border-b border-gray-200 shadow-sm">
-              <td className="px-3 py-2">{new Date(finance.timestamp).toLocaleString()}</td>
+              <td className="px-3 py-2">
+                {new Date(finance.timestamp + "Z").toLocaleString()}
+              </td>
               <td className="px-3 py-2">{finance.amount}</td>
               <td className="px-3 py-2">{finance.currency}</td>
               <td className="px-3 py-2">{finance.status}</td>
@@ -155,18 +160,18 @@ const FinanceTable: React.FC = () => {
                   "No Image"
                 )}
               </td>
-              <td className="px-3 py-2">
-                <button 
-                  onClick={() => handleEditClick(finance)} 
-                  className="text-blue-500 hover:underline shadow-sm mr-2"
+              <td className="px-3 py-2 space-x-2">
+                <button
+                  onClick={() => handleEditClick(finance)}
+                  className="shadow-sm text-blue-500 hover:underline"
                 >
-                  <FiEdit size={18} className="text-blue-500" />
+                  <FiEdit size={18} />
                 </button>
-                <button 
-                  onClick={() => handleDelete(finance.id)} 
-                  className="text-red-500 hover:underline shadow-sm"
+                <button
+                  onClick={() => handleDelete(finance.id)}
+                  className="shadow-sm text-red-500 hover:underline"
                 >
-                  <FiTrash2 size={18} className="text-red-500" />
+                  <FiTrash2 size={18} />
                 </button>
               </td>
             </tr>
@@ -180,17 +185,18 @@ const FinanceTable: React.FC = () => {
           )}
         </tbody>
       </table>
-      <div className="flex flex-col md:flex-row items-center justify-between mt-4 text-sm text-gray-500 ">
+
+      <div className="flex flex-col md:flex-row items-center justify-between mt-4 text-sm text-gray-500">
         <div>
-          Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-          {Math.min(currentPage * itemsPerPage, filteredFinances.length)} of{" "}
+          Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
+          {Math.min(currentPage * itemsPerPage, filteredFinances.length)} of{' '}
           {filteredFinances.length} entries
         </div>
         <div className="flex items-center gap-2 mt-2 md:mt-0">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="px-3 py-1 border rounded hover:bg-gray-100 shadow-sm"
+            className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 shadow-sm"
           >
             Prev
           </button>
@@ -198,7 +204,7 @@ const FinanceTable: React.FC = () => {
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-3 py-1 border rounded hover:bg-gray-100 shadow-sm ${
+              className={`px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 shadow-sm ${
                 page === currentPage ? "bg-gray-200 font-bold" : ""
               }`}
             >
@@ -208,18 +214,15 @@ const FinanceTable: React.FC = () => {
           <button
             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 border rounded hover:bg-gray-100 shadow-sm"
+            className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 shadow-sm"
           >
             Next
           </button>
         </div>
       </div>
+
       {openAdd && (
-        <AddFinance
-          open={openAdd}
-          setOpen={setOpenAdd}
-          onFinanceAdded={fetchFinances}
-        />
+        <AddFinance open={openAdd} setOpen={setOpenAdd} onFinanceAdded={fetchFinances} />
       )}
       {openEdit && editFinance && (
         <EditFinance

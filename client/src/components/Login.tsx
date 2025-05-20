@@ -89,7 +89,7 @@ const Login: React.FC<LoginProps> = ({ setToken }) => {
 
           <p className="mt-4 text-center text-sm text-black">
             Don't have an account?{' '}
-            <a href="/register" className="text-black hover:underline">Register</a>
+            <a href="/register" className="text-green-600 hover:underline">Register</a>
           </p>
         </form>
       </div>
