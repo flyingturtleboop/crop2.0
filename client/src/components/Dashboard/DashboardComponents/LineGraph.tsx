@@ -1,4 +1,4 @@
-// DashboardComponents/LineGraph.tsx
+// src/components/DashboardComponents/LineGraph.tsx
 import React from "react";
 import {
   ResponsiveContainer,
@@ -15,48 +15,31 @@ interface LineGraphProps {
 }
 
 export const LineGraph: React.FC<LineGraphProps> = ({ finances }) => {
-  // Sort the finance data by timestamp (ascending) and format it for the chart
-  const sortedData = [...finances].sort(
+  const sorted = [...finances].sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
-  const data = sortedData.map((fin) => ({
+  const data = sorted.map((fin) => ({
     name: new Date(fin.timestamp).toLocaleDateString(),
     total: fin.total,
   }));
 
   return (
-    <div className="h-64">
-      <div className="flex items-center gap-1.5 mb-2">
-        <h3 className="font-medium">Total Revenue Over Past Week</h3>
-      </div>
+    <div className="h-80">
+      <h3 className="text-2xl font-semibold mb-4">Total Revenue Over Past Week</h3>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={data}
-          margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
-        >
-          {/* Only show the x-axis and y-axis lines */}
-          <XAxis
-            dataKey="name"
-            axisLine={true}
-            tickLine={false}
-            padding={{ right: 4 }}
-            stroke="#ccc"
-          />
-          <YAxis axisLine={true} tickLine={false} stroke="#ccc" />
-          <Tooltip
-            wrapperClassName="text-sm rounded"
-            labelClassName="text-xs text-stone-500"
-          />
+        <LineChart data={data} margin={{ top: 24, right: 24, left: 0, bottom: 24 }}>
+          <XAxis dataKey="name" axisLine tickLine={false} padding={{ right: 6 }} stroke="#ccc" />
+          <YAxis axisLine tickLine={false} stroke="#ccc" />
+          <Tooltip wrapperClassName="text-base rounded" labelClassName="text-sm text-stone-500" />
           <Line
             type="monotone"
             dataKey="total"
             stroke="#22c55e"
-            strokeWidth={3}
-            dot={{ r: 4 }}
-            activeDot={{ r: 6 }}
-            isAnimationActive={true}
+            strokeWidth={4}
+            dot={{ r: 5 }}
+            activeDot={{ r: 7 }}
+            isAnimationActive
             animationDuration={1500}
-            animationEasing="ease-out"
           />
         </LineChart>
       </ResponsiveContainer>
