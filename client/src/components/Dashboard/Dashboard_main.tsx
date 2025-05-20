@@ -99,7 +99,7 @@ const Dashboard_main: React.FC = () => {
       {/* Header with date-range picker */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+          <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
           <div className="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-2">
             <CalendarIcon size={20} className="text-gray-500 mr-2" />
             <DatePicker
