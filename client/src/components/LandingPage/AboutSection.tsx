@@ -1,30 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Parallax } from 'react-parallax';
 import CountUp from 'react-countup';
-import { MdAnalytics, MdCloud, MdPhoneIphone, MdForum, MdSecurity } from 'react-icons/md';
+import { MdAnalytics, MdCalendarToday, MdPhoneIphone, MdAttachMoney, MdSecurity } from 'react-icons/md';
 
 // Dependencies:
 // npm install react-countup react-parallax react-icons
 
-// Weather widget using open-meteo (no API key needed)
+// Weather widget using open-meteo with geolocation fallback (default to US Great Plains)
 const WeatherWidget: React.FC = () => {
   const [weather, setWeather] = useState<{ temperature: number; windspeed: number } | null>(null);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(({ coords }) => {
-        const { latitude, longitude } = coords;
-        fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
-        )
-          .then((res) => res.json())
-          .then((data) => {
-            setWeather({
-              temperature: data.current_weather.temperature,
-              windspeed: data.current_weather.windspeed,
-            });
+    const fetchWeather = (latitude: number, longitude: number) => {
+      fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setWeather({
+            temperature: data.current_weather.temperature,
+            windspeed: data.current_weather.windspeed,
           });
-      });
+        })
+        .catch((err) => console.error('Weather fetch error:', err));
+    };
+
+    const defaultLat = 39.0119;
+    const defaultLon = -98.4842;
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => fetchWeather(coords.latitude, coords.longitude),
+        (err) => {
+          console.warn('Geolocation failed, using default coordinates:', err);
+          fetchWeather(defaultLat, defaultLon);
+        }
+      );
+    } else {
+      console.warn('Geolocation unavailable, using default coordinates');
+      fetchWeather(defaultLat, defaultLon);
     }
   }, []);
 
@@ -80,10 +94,10 @@ const AboutSection: React.FC = () => {
               </div>
             </div>
             <div className="flex items-start bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-              <MdCloud size={36} className="text-blue-500 mr-4" />
+              <MdCalendarToday size={36} className="text-blue-500 mr-4" />
               <div>
-                <h3 className="text-xl font-semibold text-gray-800">Weather Forecasts</h3>
-                <p className="text-gray-600">Receive hyperlocal weather alerts for proactive planning.</p>
+                <h3 className="text-xl font-semibold text-gray-800">Personal Calendar</h3>
+                <p className="text-gray-600">Schedule and manage farm tasks and events seamlessly.</p>
               </div>
             </div>
             <div className="flex items-start bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
@@ -94,10 +108,10 @@ const AboutSection: React.FC = () => {
               </div>
             </div>
             <div className="flex items-start bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-              <MdForum size={36} className="text-purple-500 mr-4" />
+              <MdAttachMoney size={36} className="text-purple-500 mr-4" />
               <div>
-                <h3 className="text-xl font-semibold text-gray-800">Community Forum</h3>
-                <p className="text-gray-600">Share insights and tips with fellow growers.</p>
+                <h3 className="text-xl font-semibold text-gray-800">Track Financials</h3>
+                <p className="text-gray-600">Monitor expenses, revenues, and ROI for better budgeting.</p>
               </div>
             </div>
             <div className="flex items-start bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
@@ -132,7 +146,8 @@ const AboutSection: React.FC = () => {
             />
             <button
               type="submit"
-              className="px-6 py-2 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition"
+              style={{ backgroundColor: '#10B981', color: '#FFFFFF' }}
+              className="px-6 py-2 rounded-r-lg shadow-lg hover:bg-green-700 transition"
             >
               Subscribe
             </button>
@@ -145,10 +160,7 @@ const AboutSection: React.FC = () => {
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to transform your farm?</h2>
           <p className="text-white mb-8 leading-snug">Get started today and join farmers optimizing with Crop-AI.</p>
-          <a
-            href="/register"
-            className="inline-block px-8 py-4 bg-white text-green-600 font-bold rounded-full shadow-xl hover:shadow-2xl transition"
-          >
+          <a href="/register" className="inline-block px-8 py-4 bg-white text-green-600 font-bold rounded-full shadow-xl hover:bg-gray-100 transition">
             Get Started
           </a>
         </div>
