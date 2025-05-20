@@ -1,6 +1,11 @@
 import json
 import os
 from datetime import datetime, timedelta, timezone
+import base64
+import numpy as np
+import tensorflow as tf
+from PIL import Image
+import io
 
 from dotenv import load_dotenv
 load_dotenv()   # <-- loads .env in your project root
@@ -516,6 +521,52 @@ def delete_reminder(reminder_id):
     if not rem: return jsonify({'error':'Reminder not found'}),404
     db.session.delete(rem); db.session.commit()
     return jsonify({'msg':'Reminder deleted'}),200
+
+@app.route('/api/check-model', methods=['POST'])
+def check_model():
+    data = request.get_json()
+    model_path = data.get("modelPath")
+
+    if not model_path or not os.path.exists(model_path):
+        return jsonify({'success': False, 'error': 'Model not found'}), 404
+
+    return jsonify({'success': True})
+
+MODEL = tf.keras.models.load_model('newplantvillage/plant_disease_model.h5')
+
+@app.route('/api/analyze-leaf', methods=['POST'])
+def analyze_leaf():
+    try:
+        data = request.get_json()
+        image_data = data['imageData'].split(',')[1]  # remove base64 header
+        image_bytes = base64.b64decode(image_data)
+
+        image = Image.open(io.BytesIO(image_bytes)).resize((128, 128))
+        img_array = np.array(image) / 255.0
+
+        # Ensure it's RGB
+        if img_array.ndim == 2:
+            img_array = np.stack((img_array,)*3, axis=-1)
+        elif img_array.shape[2] == 4:
+            img_array = img_array[:, :, :3]
+
+        img_array = np.expand_dims(img_array, axis=0)
+
+        predictions = MODEL.predict(img_array)[0]
+        confidence = float(np.max(predictions) * 100)
+        class_index = int(np.argmax(predictions))
+
+        # Customize logic as needed based on your model's class labels
+        is_healthy = class_index == 0  # assume class 0 is 'healthy'
+
+        return jsonify({
+            'isHealthy': is_healthy,
+            'confidence': confidence,
+            'details': 'Possible signs of leaf spot disease detected. Consider treatment with fungicide.' if not is_healthy else 'No visible signs of disease detected. Leaf appears healthy.'
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # ─── Run App ─────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
