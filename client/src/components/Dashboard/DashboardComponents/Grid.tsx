@@ -1,4 +1,4 @@
-// DashboardComponents/Grid.tsx
+// src/components/DashboardComponents/Grid.tsx
 import React from "react";
 import { StatCards } from "./StatCards";
 import { LineGraph } from "./LineGraph";
@@ -10,24 +10,23 @@ interface GridProps {
   crops: Crop[];
 }
 
-const Grid: React.FC<GridProps> = ({ finances, crops }) => {
-  return (
-    <div className="p-4 w-full">
-      {/* Top row: Stat cards */}
+const Grid: React.FC<GridProps> = ({ finances, crops }) => (
+  <>
+    {/* Stat Cards Row */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
       <StatCards finances={finances} />
-      {/* Bottom row: Line chart and Pie chart side by side */}
-      <div className="grid grid-cols-12 gap-4 mt-4">
-        {/* Line chart in 8 columns */}
-        <div className="col-span-12 lg:col-span-8 border border-stone-300 rounded p-4 w-full">
-          <LineGraph finances={finances} />
-        </div>
-        {/* Pie chart in 4 columns */}
-        <div className="col-span-12 lg:col-span-4 border border-stone-300 rounded p-4 w-full">
-          <PieChartComponent crops={crops} />
-        </div>
+    </div>
+
+    {/* Charts Row */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 bg-white rounded-2xl shadow p-8">
+        <LineGraph finances={finances} />
+      </div>
+      <div className="bg-white rounded-2xl shadow p-8">
+        <PieChartComponent crops={crops} />
       </div>
     </div>
-  );
-};
+  </>
+);
 
 export default Grid;
