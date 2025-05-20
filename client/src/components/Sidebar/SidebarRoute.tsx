@@ -1,4 +1,3 @@
-// src/components/Sidebar/SidebarRoute.tsx
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { IconType } from "react-icons";
@@ -16,24 +15,33 @@ export const SidebarRoute: React.FC<SidebarRouteProps> = ({
   to,
   collapsed,
 }) => {
-  // choose a larger icon size
-  const size = collapsed ? 24 : 18;
-
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
-        `flex items-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
-          isActive
-            ? "bg-gray-100 text-green-800 font-bold"
-            : "hover:bg-stone-200 text-stone-500"
-        } ${collapsed ? "justify-center" : "justify-start"}`
-      }
       end
+      className={({ isActive }) =>
+        `flex items-center gap-3 px-3 py-2 rounded-md transition-all
+         ${isActive ? "bg-white shadow-sm" : "hover:bg-gray-100"}
+         ${collapsed ? "justify-center" : "justify-start"}`
+      }
     >
-      <Icon size={size} />
-      {/* only render the label when not collapsed */}
-      {!collapsed && <span>{title}</span>}
+      {({ isActive }) => (
+        <>
+          <Icon
+            size={20}
+            className={isActive ? "text-green-700" : "text-gray-600"}
+          />
+          {!collapsed && (
+            <span
+              className={`text-sm ${
+                isActive ? "text-green-700" : "text-gray-600"
+              }`}
+            >
+              {title}
+            </span>
+          )}
+        </>
+      )}
     </NavLink>
   );
 };
