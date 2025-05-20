@@ -1,4 +1,3 @@
-// src/components/Sidebar/AccountToggle.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -47,24 +46,22 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
   };
 
   return (
-    <div>
+    <div className="p-3 mb-1">
       <button
         onClick={toggleDropdown}
-        className="w-full flex items-center justify-between px-3 py-2 hover:bg-stone-400 rounded transition"
+        className="w-full flex items-center justify-between hover:bg-gray-100 rounded-md transition px-2 py-2"
       >
         <div className="flex items-center gap-3">
-          <img
-            src="https://api.dicebear.com/9.x/notionists/svg"
-            alt="avatar"
-            className="w-8 h-8 rounded bg-green-500 shadow"
-          />
+          <div className="w-8 h-8 rounded-md bg-purple-600 flex items-center justify-center text-white font-bold">
+            {profile?.name?.charAt(0) || "U"}
+          </div>
           {/* hide text if sidebar is collapsed */}
           {!collapsed && (
             <div className="text-left">
-              <div className="font-semibold text-sm">
+              <div className="font-medium text-sm text-gray-800">
                 {profile?.name ?? "Loading..."}
               </div>
-              <div className="text-xs text-stone-500">
+              <div className="text-xs text-gray-500">
                 {profile?.email ?? ""}
               </div>
             </div>
@@ -73,9 +70,9 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
         {/* chevron always on the right if not collapsed */}
         {!collapsed &&
           (isOpen ? (
-            <FiChevronUp className="text-stone-500" />
+            <FiChevronUp className="text-gray-500" />
           ) : (
-            <FiChevronDown className="text-stone-500" />
+            <FiChevronDown className="text-gray-500" />
           ))}
       </button>
 
@@ -87,7 +84,7 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
         >
           <button
             onClick={logOut}
-            className="w-full text-left px-4 py-2 hover:bg-stone-200 transition rounded-b"
+            className="w-full text-left px-4 py-2 hover:bg-gray-100 transition rounded-md text-sm text-gray-600"
           >
             Logout
           </button>
