@@ -52,7 +52,7 @@ const AboutSection: React.FC = () => {
       >
         <div className="relative bg-green-900 bg-opacity-30 flex h-screen flex-col items-center justify-center text-center p-4">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-extrabold text-green-300 drop-shadow-2xl">
-            Discover Crop-AI
+            Discover CropAI
           </h1>
           {/* Prominent Accuracy Display */}
           <div className="mt-8 flex flex-col items-center">
