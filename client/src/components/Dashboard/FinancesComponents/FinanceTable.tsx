@@ -1,4 +1,3 @@
-// FinanceTable.tsx
 import React, { useEffect, useState, Fragment } from "react";
 import axios from "axios";
 import { FiEdit, FiTrash2, FiSearch, FiPlus } from "react-icons/fi";
@@ -103,13 +102,16 @@ const FinanceTable: React.FC = () => {
             <FiPlus size={18} className="text-green-500" />
             Add Finance
           </button>
-          <input
-            type="text"
-            placeholder="Search..."
-            className="border border-gray-300 rounded px-3 py-2 shadow-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="border border-gray-300 rounded pl-9 pr-3 py-2 shadow-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FiSearch className="absolute left-3 text-gray-400 pointer-events-none" />
+          </div>
         </div>
       </div>
       <table className="min-w-full border border-gray-300 text-sm shadow-sm">

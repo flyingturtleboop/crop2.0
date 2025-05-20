@@ -19,7 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     <aside
       className={`
         fixed top-0 left-0 h-full bg-white border-r
-        transition-all duration-300 ease-in-out
+        transition-all duration-300 ease-in-out border-b border-stone-300 mb-4
         ${collapsed ? "w-16" : "w-64"}
       `}
     >

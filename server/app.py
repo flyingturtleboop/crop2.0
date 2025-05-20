@@ -195,6 +195,44 @@ def my_profile(getemail):
     if not u: return jsonify({'error':'User not found'}), 404
     return jsonify({'id':u.id,'name':u.name,'email':u.email,'occupation':u.occupation})
 
+@app.route('/profile/<string:getemail>', methods=['PUT'])
+@jwt_required()
+def update_profile(getemail):
+    current = get_jwt_identity()
+    if current != getemail:
+        return jsonify({'error': 'Unauthorized Access'}), 403
+
+    user = User.query.filter_by(email=getemail).first()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    data = request.json or {}
+    name     = data.get('name', '').strip()
+    email    = data.get('email', '').strip()
+    password = data.get('password', '').strip()
+
+    # Validate
+    if name:
+        user.name = name
+
+    if email and email != user.email:
+        # ensure no one else has that email
+        if User.query.filter(User.email==email, User.id!=user.id).first():
+            return jsonify({'error': 'Email already in use'}), 400
+        user.email = email
+
+    if password:
+        user.password = bcrypt.generate_password_hash(password)
+
+    db.session.commit()
+
+    return jsonify({
+        'id':         user.id,
+        'name':       user.name,
+        'email':      user.email,
+        'occupation': user.occupation
+    })
+
 # ——— Crop Tracker CRUD —————————————————————————————————————————————————
 @app.route('/crops', methods=['POST'])
 @jwt_required()
