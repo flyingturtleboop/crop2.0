@@ -67,7 +67,7 @@ class CropPlot(db.Model):
             'longitude': self.longitude,
         }
 
-# Finance total calculation before insert
+# Finance total calculation
 @event.listens_for(Finance, 'before_insert')
 def update_total(mapper, connection, target):
     sess = Session(bind=connection)
@@ -98,7 +98,7 @@ class Reminder(db.Model):
         backref=db.backref("reminders", lazy=True, cascade="all, delete-orphan")
     )
 
-# SoilData model to store soil sensor readings
+# SoilData model
 class SoilData(db.Model):
     __tablename__ = "soil_data"
 
@@ -110,7 +110,7 @@ class SoilData(db.Model):
     location     = db.Column(db.String(150), nullable=True)
     latitude     = db.Column(db.Float, nullable=True)
     longitude    = db.Column(db.Float, nullable=True)
-    crop_id      = db.Column(db.String(32), db.ForeignKey('crops.id'), nullable=False)  # Link soil data to crop
+    crop_id      = db.Column(db.String(32), db.ForeignKey('crops.id'), nullable=False)
 
     crop = db.relationship("Crop", backref="soil_data", lazy=True)
 

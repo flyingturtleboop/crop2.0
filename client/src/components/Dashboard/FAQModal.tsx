@@ -1,4 +1,3 @@
-// FAQModal.tsx
 import React, { useState, useEffect, useRef } from "react";
 
 interface FAQModalProps {

@@ -3,10 +3,7 @@ import { Parallax } from 'react-parallax';
 import CountUp from 'react-countup';
 import { MdAnalytics, MdCalendarToday, MdPhoneIphone, MdAttachMoney, MdSecurity } from 'react-icons/md';
 
-// Dependencies:
-// npm install react-countup react-parallax react-icons
 
-// Weather widget using open-meteo with geolocation fallback (default to US Great Plains)
 const WeatherWidget: React.FC = () => {
   const [weather, setWeather] = useState<{ temperature: number; windspeed: number } | null>(null);
 

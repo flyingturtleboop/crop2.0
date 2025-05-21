@@ -1,4 +1,3 @@
-// Finances.tsx
 import React from 'react';
 import FinanceTable from './FinancesComponents/FinanceTable';
 

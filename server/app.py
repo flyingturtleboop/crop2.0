@@ -8,7 +8,7 @@ from PIL import Image
 import io
 
 from dotenv import load_dotenv
-load_dotenv()   # <-- loads .env in your project root
+load_dotenv()   
 
 from flask import (
     Flask, request, jsonify, send_from_directory,
@@ -25,7 +25,7 @@ from werkzeug.utils import secure_filename
 from authlib.integrations.flask_client import OAuth
 from models import db, User, Crop, Finance, Reminder, get_uuid, CropPlot
 
-# ─── App Initialization ───────────────────────────────────────────────────────
+# App Initialization 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app, supports_credentials=True)
@@ -53,25 +53,25 @@ def login():
 @app.route('/api/auth/google/callback')
 def google_callback():
     try:
-        # 1️⃣ Exchange code for tokens
+        # Exchange code for tokens
         token = oauth.google.authorize_access_token()
 
-        # 2️⃣ Pull user data from the ID token
+        # Pull user data from the ID token
         user_info = oauth.google.parse_id_token(token, None)
         email     = user_info.get('email')
         name      = user_info.get('name', '')
 
-        # 3️⃣ Create user if new
+        # Create user if new
         user = User.query.filter_by(email=email).first()
         if not user:
             user = User(name=name, email=email, password='oauth', occupation='')
             db.session.add(user)
             db.session.commit()
 
-        # 4️⃣ Make your own JWT
+        # Make your own JWT
         jwt_token = create_access_token(identity=email)
 
-        # 5️⃣ Redirect back into React with token in the URL
+        # Redirect back into React with token in the URL
         return redirect(
             f"{FRONTEND_URL}/oauth2-callback"
             f"?token={jwt_token}"
@@ -151,7 +151,7 @@ def uploaded_file(fn):
 def hello():
     return '<p>Hello, World!</p>'
 
-# ——— Auth Endpoints ———————————————————————————————————————————————————
+#  Auth Endpoints 
 @app.route('/signup', methods=['POST'])
 def signup():
     try:
@@ -238,7 +238,7 @@ def update_profile(getemail):
         'occupation': user.occupation
     })
 
-# ——— Crop Tracker CRUD —————————————————————————————————————————————————
+#  Crop Tracker CRUD 
 @app.route('/crops', methods=['POST'])
 @jwt_required()
 def create_crop():
@@ -356,7 +356,7 @@ def delete_crop(crop_id):
     db.session.commit()
     return jsonify({'msg': 'Crop deleted successfully'})
 
-# ─── Finance CRUD ─────────────────────────────────────────────────────────────
+#  Finance CRUD 
 @app.route('/finances', methods=['POST'])
 @jwt_required()
 def create_finance():
@@ -458,7 +458,7 @@ def delete_finance(finance_id):
         db.session.rollback()
         return jsonify({'error':str(e)}),500
 
-# ─── Map Plot Endpoints ───────────────────────────────────────────────────────
+#  Map Plot Endpoints 
 @app.route('/api/plots', methods=['GET'])
 def get_plots():
     return jsonify([p.to_dict() for p in CropPlot.query.all()])
@@ -471,7 +471,7 @@ def create_plot():
     db.session.commit()
     return jsonify(plot.to_dict()),201
 
-# ─── Reminders Endpoints ──────────────────────────────────────────────────────
+#  Reminders Endpoints 
 @app.route('/api/reminders', methods=['GET'])
 @jwt_required()
 def get_reminders():
@@ -551,13 +551,12 @@ MODEL = tf.keras.models.load_model('newplantvillage/plant_disease_model.h5')
 def analyze_leaf():
     try:
         data = request.get_json()
-        image_data = data['imageData'].split(',')[1]  # remove base64 header
+        image_data = data['imageData'].split(',')[1]  
         image_bytes = base64.b64decode(image_data)
 
         image = Image.open(io.BytesIO(image_bytes)).resize((128, 128))
         img_array = np.array(image) / 255.0
 
-        # Ensure it's RGB
         if img_array.ndim == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
         elif img_array.shape[2] == 4:
@@ -569,8 +568,7 @@ def analyze_leaf():
         confidence = float(np.max(predictions) * 100)
         class_index = int(np.argmax(predictions))
 
-        # Customize logic as needed based on your model's class labels
-        is_healthy = class_index == 0  # assume class 0 is 'healthy'
+        is_healthy = class_index == 0 
 
         return jsonify({
             'isHealthy': is_healthy,
@@ -585,28 +583,26 @@ def analyze_leaf():
 @jwt_required()
 def add_soil_data():
     data = request.json or {}
-    user = get_current_user()  # Get the current user using JWT
+    user = get_current_user()  
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    # Validate required fields in the incoming request
     for field in ['pH', 'moisture', 'temperature', 'crop_id']:
         if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
 
     try:
-        # Add soil data to the database
         soil_data = SoilData(
             pH=data['pH'],
             moisture=data['moisture'],
             temperature=data['temperature'],
-            location=data.get('location', ''),  # optional field
-            latitude=data.get('latitude'),  # optional field
-            longitude=data.get('longitude'),  # optional field
-            crop_id=data['crop_id']  # link the soil data to the crop
+            location=data.get('location', ''),  
+            latitude=data.get('latitude'),  
+            longitude=data.get('longitude'),  
+            crop_id=data['crop_id']  
         )
         db.session.add(soil_data)
-        db.session.commit()  # Commit the new data to the database
+        db.session.commit()  
         return jsonify({
             'id': soil_data.id,
             'pH': soil_data.pH,
@@ -619,7 +615,7 @@ def add_soil_data():
         }), 201
 
     except Exception as e:
-        db.session.rollback()  # Rollback in case of any error
+        db.session.rollback()  
         return jsonify({'error': str(e)}), 500
 
 
@@ -649,7 +645,7 @@ def get_soil_data(crop_id):
 
     return jsonify(result)
 
-# API to update soil data (optional)
+# API to update soil data
 @app.route('/api/soil-data/<string:soil_id>', methods=['PUT'])
 @jwt_required()
 def update_soil_data(soil_id):
@@ -704,6 +700,6 @@ def delete_soil_data(soil_id):
 
     return jsonify({'msg': 'Soil data deleted successfully'})
 
-# ─── Run App ─────────────────────────────────────────────────────────────────
+#  Run App 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)

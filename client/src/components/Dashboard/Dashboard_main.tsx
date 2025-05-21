@@ -1,4 +1,3 @@
-// src/components/Dashboard_main.tsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +8,6 @@ import FAQModal from "./FAQModal";
 import { StatCards } from "./DashboardComponents/StatCards";
 import Grid from "./DashboardComponents/Grid";
 
-// Define Finance and Crop interfaces
 export interface Finance {
   id: string;
   amount: number;
@@ -30,7 +28,6 @@ export interface Crop {
   location: string;
 }
 
-// Utility function for fetching data
 const fetchData = async (url: string) => {
   const token = localStorage.getItem("token");
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -45,7 +42,6 @@ const Dashboard_main: React.FC = () => {
   const [error, setError] = useState("");
   const [showChat, setShowChat] = useState(false);
 
-  // Date range state (default last 7 days)
   const [startDate, setStartDate] = useState<Date>(
     new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
   );
@@ -53,7 +49,6 @@ const Dashboard_main: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // Fetch finances & crops for the selected date range
   const loadFinances = async () => {
     const start = startDate.toISOString().slice(0, 10);
     const end = endDate.toISOString().slice(0, 10);
@@ -96,7 +91,7 @@ const Dashboard_main: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with date-range picker */}
+      {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
           <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>

@@ -13,15 +13,12 @@ const OAuth2Callback: React.FC = () => {
     const email = params.get('email');
 
     if (token && email) {
-      // set React state + persist
       setToken(token);
       localStorage.setItem('token', token);
       localStorage.setItem('email', email);
 
-      // hard redirect into dashboard
       window.location.replace('/dashboard');
     } else {
-      // on failure just go back to login
       window.location.replace('/login');
     }
   }, [location.search, setToken]);

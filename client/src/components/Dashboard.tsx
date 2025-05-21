@@ -1,6 +1,5 @@
-// src/components/Dashboard.tsx
 import React, { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";  // Import Routes and Route for routing
+import { Routes, Route } from "react-router-dom";  
 import Sidebar from "./Sidebar/Sidebar";
 import Dashboard_main from "./Dashboard/Dashboard_main";
 import Finances from "./Dashboard/Finances";
@@ -9,7 +8,7 @@ import Analysis from "./Dashboard/Analysis";
 import Maps from "./Dashboard/Maps";
 import SettingsPage from "./Dashboard/SettingsPage";
 import Calendar from "./Dashboard/Calendar";
-import SoilSensors from "./Dashboard/SoilSensors";  // Import SoilSensors
+import SoilSensors from "./Dashboard/SoilSensors"; 
 
 interface DashboardProps {
   removeToken: () => void;
@@ -19,7 +18,6 @@ const Dashboard: React.FC<DashboardProps> = ({ removeToken }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    // If we just logged in, alert now
     if (localStorage.getItem("justLoggedIn")) {
       alert("Successfully Logged In");
       localStorage.removeItem("justLoggedIn");
@@ -44,10 +42,8 @@ const Dashboard: React.FC<DashboardProps> = ({ removeToken }) => {
           <Route path="settings" element={<SettingsPage />} />
           <Route path="calendar" element={<Calendar />} />
 
-          {/* Define the dynamic route for soil sensors with cropId */}
           <Route path="soil-sensors/:cropId" element={<SoilSensors />} />  
 
-          {/* Default route */}
           <Route path="*" element={<Dashboard_main />} />
         </Routes>
       </main>

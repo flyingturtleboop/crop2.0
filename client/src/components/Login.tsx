@@ -21,15 +21,12 @@ const Login: React.FC<LoginProps> = ({ setToken }) => {
     try {
       const { data } = await axios.post('http://localhost:5000/logintoken', loginForm);
 
-      // 1) update React state + persist
       setToken(data.access_token);
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('email', loginForm.email);
 
-      // 2) fire the toast
       notify('Successfully Logged In', 'success');
 
-      // 3) client‐side navigation (no reload!)
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
       if (err.response?.status === 401) {
