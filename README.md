@@ -34,7 +34,7 @@ CropAI combines a React/TypeScript frontend, a Flask backend, and a TensorFlow C
 * **AI/ML:** TensorFlow/Keras (Adam optimizer)  
 * **Database:** SQLite  
 
-### Screenshots
+### Some Screenshots
 
 #### Dashboard
 
