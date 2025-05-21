@@ -77,7 +77,8 @@ class CropPlot(db.Model):
             'longitude': self.longitude,
         }
 
-# Finance total calculation\@event.listens_for(Finance, 'before_insert')
+# Finance total calculation
+@event.listens_for(Finance, 'before_insert')
 def update_total(mapper, connection, target):
     sess = Session(bind=connection)
     last = sess.query(Finance) \
