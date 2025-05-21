@@ -7,11 +7,10 @@ Smart Crop Management. CropAI helps farmers track, analyze, and optimize their c
 ## Table of Contents
 
 * [About The Project](#about-the-project)
-
   * [Built With](#built-with)
   * [Dependencies](#dependencies)
+  * [Screenshots](#screenshots)
 * [Getting Started](#getting-started)
-
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
 * [Usage](#usage)
@@ -22,7 +21,7 @@ Smart Crop Management. CropAI helps farmers track, analyze, and optimize their c
 
 ## About The Project
 
-CropAI combines a React/TypeScript frontend, a Flask backend, and an TensorFlow CNN model to deliver:
+CropAI combines a React/TypeScript frontend, a Flask backend, and a TensorFlow CNN model to deliver:
 
 * **Account & Profile Management**
 * **Crop & Finance Tracking**
@@ -32,10 +31,10 @@ CropAI combines a React/TypeScript frontend, a Flask backend, and an TensorFlow 
 
 ### Built With
 
-* **Frontend:** Vite, React, TypeScript, Tailwind CSS, lucide‑react
-* **Backend:** Flask, SQLAlchemy, Flask-Migrate, JWT Auth, Flask-Bcrypt
-* **AI/ML:** TensorFlow/Keras (Adam optimizer)
-* **Database:** SQLite
+* **Frontend:** Vite, React, TypeScript, Tailwind CSS, lucide-react  
+* **Backend:** Flask, SQLAlchemy, Flask-Migrate, JWT Auth, Flask-Bcrypt  
+* **AI/ML:** TensorFlow/Keras (Adam optimizer)  
+* **Database:** SQLite  
 
 ### Dependencies
 
@@ -43,26 +42,26 @@ CropAI combines a React/TypeScript frontend, a Flask backend, and an TensorFlow 
 
 These are the direct packages our React app uses (installed via `npm install` in `client/`):
 
-* @react-oauth/google\@0.12.2
-* @tailwindcss/vite\@4.1.0
-* axios\@1.8.4
-* bootstrap\@5.3.5
-* flowbite-react\@0.11.7
-* font-awesome\@4.7.0
-* framer-motion\@12.7.4
-* lucide-react\@0.501.0
-* react-calendar\@5.1.0
-* react-countup\@6.5.3
-* react-datepicker\@8.3.0
-* react-dom\@19.1.0
-* react-dropzone\@14.3.8
-* react-icons\@5.5.0
-* react-parallax\@3.5.2
-* react-router-dom\@7.6.0
-* react\@19.1.0
-* recharts\@2.15.2
-* router-dom\@3.0.3
-* tailwindcss\@4.1.3
+- @react-oauth/google@0.12.2  
+- @tailwindcss/vite@4.1.0  
+- axios@1.8.4  
+- bootstrap@5.3.5  
+- flowbite-react@0.11.7  
+- font-awesome@4.7.0  
+- framer-motion@12.7.4  
+- lucide-react@0.501.0  
+- react-calendar@5.1.0  
+- react-countup@6.5.3  
+- react-datepicker@8.3.0  
+- react-dom@19.1.0  
+- react-dropzone@14.3.8  
+- react-icons@5.5.0  
+- react-parallax@3.5.2  
+- react-router-dom@7.6.0  
+- react@19.1.0  
+- recharts@2.15.2  
+- router-dom@3.0.3  
+- tailwindcss@4.1.3  
 
 #### Backend
 
@@ -211,6 +210,28 @@ wrapt==1.17.2
 yarl==1.18.3
 ```
 
+### Screenshots
+
+#### Dashboard
+
+![Dashboard](docs/images/dashboard.png)
+
+#### AI ChatBot
+
+![AI ChatBot](docs/images/chatbot.png)
+
+#### Leaf Health Analysis
+
+![Leaf Health Analysis](docs/images/analysis.png)
+
+#### Maps
+
+![Maps](docs/images/maps.png)
+
+#### Login
+
+![Login](docs/images/login.png)
+
 ---
 
 ## Getting Started
@@ -219,21 +240,19 @@ Follow these steps to get a local copy up and running.
 
 ### Prerequisites
 
-* **Node.js**
-* **Python 3.8+**
-* **Git**
+* **Node.js**  
+* **Python 3.8+**  
+* **Git**  
 
 ### Installation
 
 1. **Clone the repo**
 
    ```bash
-   ```
-
 git clone <your-repo-url>
 cd cropAI
+   ```
 
-````n
 2. **Frontend setup**
 
    ```bash
@@ -241,7 +260,7 @@ cd cropAI
    npm install
    npm run dev
    # Visit http://localhost:5173
-````
+   ```
 
 3. **Backend setup**
 
@@ -260,7 +279,7 @@ cd cropAI
 
 ### Running the Full Stack
 
-* **Frontend:** keeps hot‑reload at `http://localhost:5173`
+* **Frontend:** hot-reload at `http://localhost:5173`
 * **Backend:** serves JSON API at `http://localhost:5000`
 
 After logging in or signing up, explore:
@@ -268,47 +287,32 @@ After logging in or signing up, explore:
 * **Dashboard** – View summaries
 * **Crops** – Add/edit/delete crop records
 * **Finances** – Track expenses & income
-* **Analysis** – Upload an image of your plant's leaf to see if it is healthy or has a disease
+* **Analysis** – Upload an image of your crop leaf to see if it is healthy or diseased
 * **Maps** – Pin and view field locations
 * **Settings** – Manage account & notifications
 * **Calendar** – Schedule reminders
 
-### AI Inference
-
-To detect plant diseases from a leaf image:
-
-```bash
-# GUI picker
-python predict.py
-# or
-python predict.py path/to/image.jpg
-```
-
-The script will load `plant_disease_model.h5`, prompt for an image, and print the predicted class with confidence.
-
----
-
 ## API Reference
 
-| Route                          | Method           | Description                                   |
-| ------------------------------ | ---------------- | --------------------------------------------- |
-| `/signup`                      | POST             | Create a new user                             |
-| `/logintoken`                  | POST             | Login and retrieve a JWT                      |
-| `/logout`                      | POST             | Clear JWT cookie (logout)                     |
-| `/profile/<email>`             | GET              | Fetch user profile by email                   |
-| `/profile/<email>`             | PUT              | Update user name, email, and/or password      |
-| `/crops`                       | GET, POST        | List all crops or add a new crop              |
-| `/crops/<crop_id>`             | GET, PUT, DELETE | Retrieve, update, or delete a single crop     |
-| `/finances`                    | GET, POST        | List all finance records or add a new one     |
-| `/finances/<finance_id>`       | PUT, DELETE      | Update or delete a finance record             |
-| `/api/plots`                   | GET, POST        | List all field-map plots or create a new plot |
-| `/api/reminders`               | GET, POST        | List all reminders or add a new one           |
-| `/api/reminders/<reminder_id>` | PUT, DELETE      | Update or delete a reminder                   |
-| `/api/check-model`             | POST             | Verify that the model file exists             |
-| `/api/analyze-leaf`            | POST             | Run leaf disease detection on a Base64 image  |
-| `/api/soil-data`               | POST             | Create a new soil reading for a crop          |
-| `/api/soil-data/<crop_id>`     | GET              | List all soil readings for a given crop       |
-| `/api/soil-data/<soil_id>`     | PUT, DELETE      | Update or delete a specific soil reading      |
+| Route                             | Method           | Description                                                      |
+| --------------------------------- | ---------------- | ---------------------------------------------------------------- |
+| `/signup`                         | POST             | Create a new user                                                |
+| `/logintoken`                     | POST             | Login and retrieve a JWT                                         |
+| `/logout`                         | POST             | Clear JWT cookie (logout)                                        |
+| `/profile/<email>`                | GET              | Fetch user profile by email                                      |
+| `/profile/<email>`                | PUT              | Update user name, email, and/or password                         |
+| `/crops`                          | GET, POST        | List all crops or add a new crop                                 |
+| `/crops/<crop_id>`                | GET, PUT, DELETE | Retrieve, update, or delete a single crop                        |
+| `/finances`                       | GET, POST        | List all finance records or add a new one                        |
+| `/finances/<finance_id>`          | PUT, DELETE      | Update or delete a finance record                                |
+| `/api/plots`                      | GET, POST        | List all field-map plots or create a new plot                    |
+| `/api/reminders`                  | GET, POST        | List all reminders or add a new one                              |
+| `/api/reminders/<reminder_id>`    | PUT, DELETE      | Update or delete a reminder                                      |
+| `/api/check-model`                | POST             | Verify that the model file exists                                |
+| `/api/analyze-leaf`               | POST             | Run leaf disease detection on a Base64 image                     |
+| `/api/soil-data`                  | POST             | Create a new soil reading for a crop                             |
+| `/api/soil-data/<crop_id>`        | GET              | List all soil readings for a given crop                          |
+| `/api/soil-data/<soil_id>`        | PUT, DELETE      | Update or delete a specific soil reading                         |
 
 ## Contributing
 
