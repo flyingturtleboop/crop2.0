@@ -65,9 +65,8 @@ export default function SoilSensors() {
         })
         .catch((err) => {
           console.error('Error fetching soil data:', err);
-          if (err.response?.status !== 404) {
-            setError('Error fetching soil data');
-          }
+          // Show user-friendly prompt to connect sensors
+          setError('Connect soil sensors');
         });
     }
   }, [cropId]);
