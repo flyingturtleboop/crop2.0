@@ -1,7 +1,9 @@
+// src/components/Sidebar/AccountToggle.tsx
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { User as UserIcon } from "lucide-react";
 
 interface AccountToggleProps {
   removeToken: () => void;
@@ -24,7 +26,7 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
+  // Close dropdown on outside click
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
       if (
@@ -38,7 +40,7 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
-  // Fetch profile
+  // Fetch profile on mount
   useEffect(() => {
     const email = localStorage.getItem("email");
     const token = localStorage.getItem("token");
@@ -69,16 +71,16 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
           collapsed ? "justify-center" : ""
         }`}
       >
-        {/* Square avatar with more rounding */}
-        <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center text-white font-semibold text-sm">
-          {profile?.name?.charAt(0) || "U"}
+        {/* always show the user icon */}
+        <div className="w-8 h-8 rounded-sm bg-green-600 flex items-center justify-center">
+          <UserIcon className="w-5 h-5 text-white" />
         </div>
 
         {!collapsed && (
           <>
             <div className="flex-1">
               <div className="text-sm font-medium text-gray-800">
-                {profile?.name ?? "Loading..."}
+                {profile?.name ?? "User"}
               </div>
               <div className="text-xs text-gray-500 truncate">
                 {profile?.email ?? ""}
@@ -100,7 +102,7 @@ export const AccountToggle: React.FC<AccountToggleProps> = ({
         >
           <button
             onClick={logOut}
-            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition"
           >
             Logout
           </button>

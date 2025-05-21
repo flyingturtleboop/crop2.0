@@ -1,3 +1,4 @@
+// src/components/FinanceTable.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiEdit, FiTrash2, FiSearch, FiPlus } from "react-icons/fi";
@@ -5,7 +6,7 @@ import AddFinance from "./AddFinance";
 import EditFinance from "./EditFinance";
 import Modal from "./Modal";
 
-interface Finance {
+export interface Finance {
   id: string;
   amount: number;
   currency: string;
@@ -18,28 +19,30 @@ interface Finance {
 
 const FinanceTable: React.FC = () => {
   const [finances, setFinances] = useState<Finance[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [openAdd, setOpenAdd] = useState<boolean>(false);
-  const [openEdit, setOpenEdit] = useState<boolean>(false);
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
   const [editFinance, setEditFinance] = useState<Finance | null>(null);
-  const [viewModal, setViewModal] = useState<boolean>(false);
+  const [viewModal, setViewModal] = useState(false);
   const [viewImage, setViewImage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
   const fetchFinances = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://127.0.0.1:5000/finances", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      const res = await axios.get<Finance[]>("http://127.0.0.1:5000/finances", {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
-      setFinances(response.data);
-      setLoading(false);
+      setFinances(res.data);
     } catch (err: any) {
-      console.error("Error fetching finances:", err);
+      console.error(err);
       setError("Failed to fetch finances");
+    } finally {
       setLoading(false);
     }
   };
@@ -56,33 +59,33 @@ const FinanceTable: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.delete(`http://127.0.0.1:5000/finances/${id}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
-      setFinances((prev) => prev.filter((finance) => finance.id !== id));
+      setFinances(prev => prev.filter(f => f.id !== id));
     } catch (err) {
-      console.error("Error deleting finance record:", err);
+      console.error(err);
       alert("Failed to delete finance record");
     }
   };
 
-  const handleEditClick = (finance: Finance) => {
-    setEditFinance(finance);
+  const handleEditClick = (f: Finance) => {
+    setEditFinance(f);
     setOpenEdit(true);
   };
 
-  const handleViewImage = (image: string) => {
-    setViewImage(image);
+  const handleImageClick = (img: string) => {
+    setViewImage(img);
     setViewModal(true);
   };
 
-  const filteredFinances = finances.filter((finance) =>
-    finance.currency.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    finance.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    finance.notes.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = finances.filter(f =>
+    f.currency.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    f.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    f.notes.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredFinances.length / itemsPerPage);
-  const paginatedFinances = filteredFinances.slice(
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const pageItems = filtered.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -107,9 +110,9 @@ const FinanceTable: React.FC = () => {
             <input
               type="text"
               placeholder="Search..."
-              className="border border-gray-300 rounded pl-10 pr-4 py-2 shadow-sm"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded shadow-sm"
             />
           </div>
         </div>
@@ -129,52 +132,45 @@ const FinanceTable: React.FC = () => {
           </tr>
         </thead>
         <tbody className="bg-white">
-          {paginatedFinances.map((finance) => (
-            <tr key={finance.id} className="hover:bg-gray-50 border-b border-gray-200 shadow-sm">
+          {pageItems.map(f => (
+            <tr key={f.id} className="hover:bg-gray-50 border-b border-gray-200">
               <td className="px-3 py-2">
-                {new Date(finance.timestamp + "Z").toLocaleString()}
+                {new Date(f.timestamp + "Z").toLocaleString()}
               </td>
-              <td className="px-3 py-2">{finance.amount}</td>
-              <td className="px-3 py-2">{finance.currency}</td>
-              <td className="px-3 py-2">{finance.status}</td>
-              <td className="px-3 py-2">{finance.notes}</td>
-              <td className="px-3 py-2">{finance.total}</td>
+              <td className="px-3 py-2">{f.amount}</td>
+              <td className="px-3 py-2">{f.currency}</td>
+              <td className="px-3 py-2">{f.status}</td>
+              <td className="px-3 py-2">{f.notes}</td>
+              <td className="px-3 py-2">{f.total}</td>
               <td className="px-3 py-2">
-                {finance.receipt_image ? (
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={finance.receipt_image}
-                      alt="Receipt"
-                      className="w-16 h-auto border shadow-sm"
-                    />
-                    <button
-                      onClick={() => handleViewImage(finance.receipt_image!)}
-                      className="bg-gray-200 text-black shadow-sm px-2 py-1 rounded text-xs"
-                    >
-                      View
-                    </button>
-                  </div>
+                {f.receipt_image ? (
+                  <img
+                    src={f.receipt_image}
+                    alt="Receipt"
+                    className="w-16 h-auto border rounded cursor-pointer"
+                    onClick={() => handleImageClick(f.receipt_image!)}
+                  />
                 ) : (
                   "No Image"
                 )}
               </td>
               <td className="px-3 py-2 space-x-2">
                 <button
-                  onClick={() => handleEditClick(finance)}
-                  className="shadow-sm text-blue-500 hover:underline"
+                  onClick={() => handleEditClick(f)}
+                  className="text-blue-500 hover:underline shadow-sm p-1 rounded"
                 >
                   <FiEdit size={18} />
                 </button>
                 <button
-                  onClick={() => handleDelete(finance.id)}
-                  className="shadow-sm text-red-500 hover:underline"
+                  onClick={() => handleDelete(f.id)}
+                  className="text-red-500 hover:underline shadow-sm p-1 rounded"
                 >
                   <FiTrash2 size={18} />
                 </button>
               </td>
             </tr>
           ))}
-          {paginatedFinances.length === 0 && (
+          {pageItems.length === 0 && (
             <tr>
               <td colSpan={8} className="text-center py-4 text-gray-500">
                 No finance records found.
@@ -186,23 +182,23 @@ const FinanceTable: React.FC = () => {
 
       <div className="flex flex-col md:flex-row items-center justify-between mt-4 text-sm text-gray-500">
         <div>
-          Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
-          {Math.min(currentPage * itemsPerPage, filteredFinances.length)} of{' '}
-          {filteredFinances.length} entries
+          Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+          {Math.min(currentPage * itemsPerPage, filtered.length)} of{" "}
+          {filtered.length} entries
         </div>
         <div className="flex items-center gap-2 mt-2 md:mt-0">
           <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
-            className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 shadow-sm"
+            className="px-3 py-1 border rounded hover:bg-gray-100 shadow-sm"
           >
             Prev
           </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 shadow-sm ${
+              className={`px-3 py-1 border rounded hover:bg-gray-100 shadow-sm ${
                 page === currentPage ? "bg-gray-200 font-bold" : ""
               }`}
             >
@@ -210,9 +206,9 @@ const FinanceTable: React.FC = () => {
             </button>
           ))}
           <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 shadow-sm"
+            className="px-3 py-1 border rounded hover:bg-gray-100 shadow-sm"
           >
             Next
           </button>
@@ -220,7 +216,11 @@ const FinanceTable: React.FC = () => {
       </div>
 
       {openAdd && (
-        <AddFinance open={openAdd} setOpen={setOpenAdd} onFinanceAdded={fetchFinances} />
+        <AddFinance
+          open={openAdd}
+          setOpen={setOpenAdd}
+          onFinanceAdded={fetchFinances}
+        />
       )}
       {openEdit && editFinance && (
         <EditFinance
@@ -239,8 +239,12 @@ const FinanceTable: React.FC = () => {
       )}
       {viewModal && viewImage && (
         <Modal show={viewModal} onClose={() => setViewModal(false)} size="lg">
-          <div className="p-4">
-            <img src={viewImage} alt="Full Receipt" className="max-w-full h-auto shadow-sm" />
+          <div className="p-4 text-center">
+            <img
+              src={viewImage}
+              alt="Full Receipt"
+              className="max-w-full h-auto shadow-sm"
+            />
           </div>
         </Modal>
       )}

@@ -1,3 +1,4 @@
+// src/components/CropTable.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiEdit, FiTrash2, FiSearch, FiPlus } from "react-icons/fi";
@@ -31,7 +32,9 @@ const CropTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
-  useEffect(() => { fetchCrops(); }, []);
+  useEffect(() => {
+    fetchCrops();
+  }, []);
 
   const fetchCrops = async () => {
     setLoading(true);
@@ -79,7 +82,7 @@ const CropTable: React.FC = () => {
     setOpenEdit(true);
   };
 
-  const handleViewImage = (img: string) => {
+  const handleImageClick = (img: string) => {
     setViewImage(img);
     setViewModal(true);
   };
@@ -105,7 +108,8 @@ const CropTable: React.FC = () => {
               placeholder="Search..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded shadow-sm" />
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded shadow-sm"
+            />
           </div>
         </div>
       </div>
@@ -118,7 +122,7 @@ const CropTable: React.FC = () => {
             <th className="px-3 py-2 text-left font-semibold">Stage</th>
             <th className="px-3 py-2 text-left font-semibold">Amount</th>
             <th className="px-3 py-2 text-left font-semibold">Location</th>
-            <th className="px-3 py-2 text-left font-semibold">Receipt</th>
+            <th className="px-3 py-2 text-left font-semibold">Image</th>
             <th className="px-3 py-2 text-left font-semibold">Actions</th>
           </tr>
         </thead>
@@ -132,17 +136,27 @@ const CropTable: React.FC = () => {
               <td className="px-3 py-2">{c.location || 'N/A'}</td>
               <td className="px-3 py-2">
                 {c.crop_image ? (
-                  <button
-                    onClick={() => handleViewImage(c.crop_image!)}
-                    className="bg-gray-200 text-black px-2 py-1 rounded text-xs"
-                  >View</button>
-                ) : 'No Image'}
+                  <img
+                    src={c.crop_image}
+                    alt="Crop"
+                    className="w-16 h-16 object-cover rounded cursor-pointer"
+                    onClick={() => handleImageClick(c.crop_image!)}
+                  />
+                ) : (
+                  'No Image'
+                )}
               </td>
               <td className="px-3 py-2 space-x-2">
-                <button onClick={() => handleEditClick(c)} className="text-blue-500 hover:underline shadow-sm p-1 rounded">
+                <button
+                  onClick={() => handleEditClick(c)}
+                  className="text-blue-500 hover:underline shadow-sm p-1 rounded"
+                >
                   <FiEdit size={18} />
                 </button>
-                <button onClick={() => handleDelete(c.id)} className="text-red-500 hover:underline shadow-sm p-1 rounded">
+                <button
+                  onClick={() => handleDelete(c.id)}
+                  className="text-red-500 hover:underline shadow-sm p-1 rounded"
+                >
                   <FiTrash2 size={18} />
                 </button>
               </td>
@@ -161,26 +175,36 @@ const CropTable: React.FC = () => {
 
       <div className="flex flex-col md:flex-row items-center justify-between mt-4 text-sm text-gray-500">
         <div>
-          Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} entries
+          Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+          {Math.min(currentPage * itemsPerPage, filtered.length)} of{" "}
+          {filtered.length} entries
         </div>
         <div className="flex items-center gap-2 mt-2 md:mt-0">
           <button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             className="px-3 py-1 border rounded hover:bg-gray-100 shadow-sm"
-          >Prev</button>
+          >
+            Prev
+          </button>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-3 py-1 border rounded hover:bg-gray-100 shadow-sm ${page === currentPage ? 'bg-gray-200 font-bold' : ''}`}
-            >{page}</button>
+              className={`px-3 py-1 border rounded hover:bg-gray-100 shadow-sm ${
+                page === currentPage ? "bg-gray-200 font-bold" : ""
+              }`}
+            >
+              {page}
+            </button>
           ))}
           <button
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
             className="px-3 py-1 border rounded hover:bg-gray-100 shadow-sm"
-          >Next</button>
+          >
+            Next
+          </button>
         </div>
       </div>
 
@@ -196,18 +220,18 @@ const CropTable: React.FC = () => {
             growth_stage: editCrop.growth_stage,
             amount_sown: editCrop.amount_sown,
             extra_notes: editCrop.extra_notes,
-            location: editCrop.location || '',
+            location: editCrop.location || "",
             latitude: editCrop.latitude || 0,
             longitude: editCrop.longitude || 0,
-            crop_image: editCrop.crop_image || ''
+            crop_image: editCrop.crop_image || ""
           }}
           onCropEdited={fetchCrops}
         />
       )}
       {viewModal && viewImage && (
         <Modal show={viewModal} onClose={() => setViewModal(false)} size="lg">
-          <div className="p-4">
-            <img src={viewImage} alt="Crop" className="max-w-full h-auto shadow-sm" />
+          <div className="p-4 text-center">
+            <img src={viewImage} alt="Crop" className="max-w-full h-auto inline-block shadow-sm" />
           </div>
         </Modal>
       )}
