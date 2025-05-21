@@ -16,7 +16,6 @@ interface CropData {
   crop_image?:  string;
 }
 
-// Geocode helper using your Maps API key
 async function geocodeAddress(address: string) {
   const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const res = await axios.get(
@@ -74,7 +73,6 @@ const EditCrop: React.FC<EditCropProps> = ({
     setFormData(prev => ({ ...prev, [name]: Number(value) }));
   };
 
-  // Auto-geocode on blur
   const handleAddressBlur = async () => {
     if (!formData.location) return;
     try {

@@ -21,7 +21,6 @@ interface CropData {
   longitude?:   number;
 }
 
-// Geocode helper using your Maps API key
 async function geocodeAddress(address: string) {
   const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const res = await axios.get(
@@ -77,7 +76,6 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
     }));
   };
 
-  // Auto-geocode when user leaves the address field
   const handleAddressBlur = async () => {
     if (!formData.location) return;
     try {
@@ -89,7 +87,6 @@ const AddCrop: React.FC<AddCropProps> = ({ open, setOpen, onCropAdded }) => {
       }));
     } catch (err: any) {
       console.warn('Geocode error:', err.message);
-      // non-blocking warning
       setError('Could not auto-fill coordinates');
     }
   };

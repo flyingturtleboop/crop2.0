@@ -1,4 +1,3 @@
-// src/components/Dashboard/Crops/CropTable.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiEdit, FiTrash2, FiSearch, FiPlus } from "react-icons/fi";
@@ -51,7 +50,6 @@ const CropTable: React.FC = () => {
     }
   };
 
-  // filter & pagination
   const filtered = crops.filter(c =>
     c.crop_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.variety.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -186,7 +184,6 @@ const CropTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Add/Edit Modals and Image Viewer */}
       {openAdd && <AddCrop open={openAdd} setOpen={setOpenAdd} onCropAdded={fetchCrops} />}
       {openEdit && editCrop && (
         <EditCrop
