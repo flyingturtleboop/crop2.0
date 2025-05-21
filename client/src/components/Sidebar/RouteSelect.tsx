@@ -17,8 +17,7 @@ export const RouteSelect: React.FC<RouteSelectProps> = ({ collapsed }) => (
     <SidebarRoute Icon={FiBarChart} to="/dashboard/analysis" title="Analysis" collapsed={collapsed} />
     <SidebarRoute Icon={FiMapPin} to="/dashboard/maps" title="Maps" collapsed={collapsed} />
     <SidebarRoute Icon={FaCalendarAlt} to="/dashboard/calendar" title="Calendar" collapsed={collapsed} />
-    <SidebarRoute Icon={FiSettings} to="/dashboard/settings" title="Settings" collapsed={collapsed} />
-    {/* Update route to navigate to soil-sensors with dynamic cropId */}
     <SidebarRoute Icon={FiUsers} to="/dashboard/soil-sensors/1" title="Soil Sensors" collapsed={collapsed} />
+    <SidebarRoute Icon={FiSettings} to="/dashboard/settings" title="Settings" collapsed={collapsed} />
   </div>
 );
