@@ -8,11 +8,9 @@ Smart Crop Management. CropAI helps farmers track, analyze, and optimize their c
 
 * [About The Project](#about-the-project)
   * [Built With](#built-with)
-  * [Dependencies](#dependencies)
   * [Screenshots](#screenshots)
-* [Getting Started](#getting-started)
-  * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
+  * [Getting Started](#getting-started)
+  * [Dependencies](#dependencies)
 * [Usage](#usage)
 * [API Reference](#api-reference)
 * [Contributing](#contributing)
@@ -36,7 +34,76 @@ CropAI combines a React/TypeScript frontend, a Flask backend, and a TensorFlow C
 * **AI/ML:** TensorFlow/Keras (Adam optimizer)  
 * **Database:** SQLite  
 
-### Dependencies
+### Screenshots
+
+#### Dashboard
+
+![Dashboard](docs/images/dashboard.png)
+
+#### AI ChatBot
+
+![AI ChatBot](docs/images/chatbot.png)
+
+#### Leaf Health Analysis
+
+![Leaf Health Analysis](docs/images/analysis.png)
+
+#### Maps
+
+![Maps](docs/images/maps.png)
+
+#### Login
+
+![Login](docs/images/login.png)
+
+#### Account Profile
+
+![Account Profile](docs/images/account.png)
+
+---
+
+## Getting Started
+
+Follow these steps to get a local copy up and running.
+
+### Prerequisites
+
+* **Node.js**  
+* **Python 3.8+**  
+* **Git**  
+
+### Installation
+
+1. **Clone the repo**
+
+   ```bash
+   git clone <your-repo-url>
+   cd cropAI
+   ```
+
+2. **Frontend setup**
+
+   ```bash
+   cd client
+   npm install
+   npm run dev
+   # Visit http://localhost:5173
+   ```
+
+3. **Backend setup**
+
+   ```bash
+   cd server
+   python3 -m venv venv
+   source venv/bin/activate    # (Windows) venv\Scripts\activate.ps1
+   pip install -r requirements.txt
+   flask db upgrade          
+   flask run                
+   ```
+
+---
+
+## Dependencies
 
 #### Frontend
 
@@ -209,69 +276,6 @@ Werkzeug==3.1.3
 wrapt==1.17.2
 yarl==1.18.3
 ```
-
-### Screenshots
-
-#### Dashboard
-
-![Dashboard](docs/images/dashboard.png)
-
-#### AI ChatBot
-
-![AI ChatBot](docs/images/chatbot.png)
-
-#### Leaf Health Analysis
-
-![Leaf Health Analysis](docs/images/analysis.png)
-
-#### Maps
-
-![Maps](docs/images/maps.png)
-
-#### Login
-
-![Login](docs/images/login.png)
-
----
-
-## Getting Started
-
-Follow these steps to get a local copy up and running.
-
-### Prerequisites
-
-* **Node.js**  
-* **Python 3.8+**  
-* **Git**  
-
-### Installation
-
-1. **Clone the repo**
-
-   ```bash
-git clone <your-repo-url>
-cd cropAI
-   ```
-
-2. **Frontend setup**
-
-   ```bash
-   cd client
-   npm install
-   npm run dev
-   # Visit http://localhost:5173
-   ```
-
-3. **Backend setup**
-
-   ```bash
-   cd server
-   python3 -m venv venv
-   source venv/bin/activate    # (Windows) venv\Scripts\activate.ps1
-   pip install -r requirements.txt
-   flask db upgrade          
-   flask run                
-   ```
 
 ## Usage
 
