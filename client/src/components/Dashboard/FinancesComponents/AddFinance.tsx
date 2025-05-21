@@ -1,4 +1,3 @@
-// AddFinance.tsx
 import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import { FiPlus } from 'react-icons/fi';

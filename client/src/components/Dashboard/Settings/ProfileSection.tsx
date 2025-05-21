@@ -1,5 +1,4 @@
-// src/components/Dashboard/Settings/ProfileSection.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import useToken from '../../useToken';
 import { useNotification } from '../../../NotificationContext';
@@ -25,7 +24,6 @@ export default function ProfileSection() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch user profile on mount
   useEffect(() => {
     const savedEmail = localStorage.getItem('email');
     if (!savedEmail) return;

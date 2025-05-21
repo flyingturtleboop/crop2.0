@@ -1,4 +1,3 @@
-// src/components/DashboardComponents/Grid.tsx
 import React from "react";
 import { StatCards } from "./StatCards";
 import { LineGraph } from "./LineGraph";
@@ -18,18 +17,11 @@ const Grid: React.FC<GridProps> = ({
   startDate,
   endDate,
 }) => {
-  // Filter finances by the selected date range
   const filteredFinances = finances.filter((f) => {
     const d = new Date(f.timestamp);
     return d >= startDate && d <= endDate;
   });
 
-  // If Crop items have timestamps, you can filter similarly:
-  // const filteredCrops = crops.filter((c: any) => {
-  //   const d = new Date(c.timestamp);
-  //   return d >= startDate && d <= endDate;
-  // });
-  // Otherwise, show all crops
   const filteredCrops = crops;
 
   return (

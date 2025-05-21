@@ -1,4 +1,3 @@
-// Modal.tsx
 import React from 'react';
 import { FiX } from 'react-icons/fi';
 
@@ -19,7 +18,6 @@ const Modal: React.FC<ModalProps> = ({ show, onClose, children, size = 'md' }) =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Semi-transparent overlay using inline RGBA */}
       <div
         className="fixed inset-0"
         style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}

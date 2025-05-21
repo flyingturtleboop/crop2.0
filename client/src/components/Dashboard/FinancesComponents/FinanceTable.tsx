@@ -1,4 +1,3 @@
-// FinanceTable.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiEdit, FiTrash2, FiSearch, FiPlus } from "react-icons/fi";
@@ -76,7 +75,6 @@ const FinanceTable: React.FC = () => {
     setViewModal(true);
   };
 
-  // filter by search term
   const filteredFinances = finances.filter((finance) =>
     finance.currency.toLowerCase().includes(searchTerm.toLowerCase()) ||
     finance.status.toLowerCase().includes(searchTerm.toLowerCase()) ||

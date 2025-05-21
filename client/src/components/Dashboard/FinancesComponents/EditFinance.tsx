@@ -1,4 +1,3 @@
-// EditFinance.tsx
 import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import { FiX, FiEdit, FiEye } from 'react-icons/fi';

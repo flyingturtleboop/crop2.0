@@ -1,4 +1,3 @@
-// src/components/DashboardComponents/LineGraph.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -34,12 +33,10 @@ export const LineGraph: React.FC = () => {
           token ? { headers: { Authorization: `Bearer ${token}` } } : {}
         );
 
-        // sort ascending by timestamp, force UTC parsing
         const sorted = resp.data
           .map((f) => ({ ...f, ts: new Date(f.timestamp + "Z").getTime() }))
           .sort((a, b) => a.ts - b.ts);
 
-        // map into recharts format
         const chartData = sorted.map((f) => ({
           name: new Date(f.ts).toLocaleDateString(),
           total: f.total,

@@ -1,4 +1,3 @@
-// src/components/DashboardComponents/PieChart.tsx
 import React, { useState } from "react";
 import {
   ResponsiveContainer,
@@ -25,7 +24,6 @@ const COLORS = [
   "#EF4444",
 ];
 
-// Renders the hovered/active slice popped out with center labels
 const renderActiveShape = (props: any) => {
   const {
     cx,
@@ -77,14 +75,12 @@ const renderActiveShape = (props: any) => {
 };
 
 export const PieChartComponent: React.FC<PieChartProps> = ({ crops }) => {
-  // 1) aggregate data
   const typeMap: Record<string, number> = {};
   crops.forEach((c) => {
     typeMap[c.crop_type] = (typeMap[c.crop_type] || 0) + c.amount_sown;
   });
   const pieData = Object.entries(typeMap).map(([name, value]) => ({ name, value }));
 
-  // 2) active slice state
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
   const onPieEnter = (_: any, index: number) => setActiveIndex(index);
@@ -103,7 +99,7 @@ export const PieChartComponent: React.FC<PieChartProps> = ({ crops }) => {
         Crop Distribution
       </h3>
 
-      {/* Chart area with fixed height */}
+      {/* Chart*/}
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -146,7 +142,7 @@ export const PieChartComponent: React.FC<PieChartProps> = ({ crops }) => {
         </ResponsiveContainer>
       </div>
 
-      {/* Manual legend inside the box */}
+      {/* Manual legend */}
       <div className="mt-4 flex flex-wrap justify-center gap-6">
         {pieData.map((entry, idx) => (
           <div key={entry.name} className="flex items-center gap-2">

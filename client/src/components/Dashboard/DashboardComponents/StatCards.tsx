@@ -1,4 +1,3 @@
-// src/components/DashboardComponents/StatCards.tsx
 import React from "react";
 import { DollarSign, TrendingUp, Calendar, Clock } from "lucide-react";
 import { Finance } from "../Dashboard_main";
@@ -10,7 +9,6 @@ interface StatCardsProps {
 export const StatCards: React.FC<StatCardsProps> = ({ finances }) => {
   if (finances.length === 0) return null;
 
-  // Find the most recent record
   const latest = finances.reduce((a, b) =>
     new Date(b.timestamp) > new Date(a.timestamp) ? b : a
   );
