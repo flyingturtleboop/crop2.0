@@ -38,23 +38,23 @@ CropAI combines a React/TypeScript frontend, a Flask backend, and a TensorFlow C
 
 #### Dashboard
 
-![Dashboard](screenshots/Dashboard.png)
+![Dashboard](Screenshots/Dashboard.png)
 
 #### AI ChatBot
 
-![AI ChatBot](screenshots/AI%20Chatbot.png)
+![AI ChatBot](Screenshots/AIChatbot.png)
 
 #### Leaf Health Analysis
 
-![Leaf Health Analysis](screenshots/Analysis.png)
+![Leaf Health Analysis](Screenshots/Analysis.png)
 
 #### Maps
 
-![Maps](screenshots/Maps.png)
+![Maps](Screenshots/Maps.png)
 
 #### Login
 
-![Login](screenshots/Login.png)
+![Login](Screenshots/Login.png)
 
 ---
 
