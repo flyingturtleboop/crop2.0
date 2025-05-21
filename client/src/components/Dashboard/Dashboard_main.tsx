@@ -3,9 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { MessageCircle, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import FAQModal from "./FAQModal";
-import { StatCards } from "./DashboardComponents/StatCards";
 import Grid from "./DashboardComponents/Grid";
 
 export interface Finance {
@@ -28,6 +27,11 @@ export interface Crop {
   location: string;
 }
 
+export interface WeatherData {
+  temperature: number;
+  windspeed: number;
+}
+
 const fetchData = async (url: string) => {
   const token = localStorage.getItem("token");
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -38,6 +42,7 @@ const fetchData = async (url: string) => {
 const Dashboard_main: React.FC = () => {
   const [finances, setFinances] = useState<Finance[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showChat, setShowChat] = useState(false);
@@ -49,6 +54,7 @@ const Dashboard_main: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // 1) Load finances & crops
   const loadFinances = async () => {
     const start = startDate.toISOString().slice(0, 10);
     const end = endDate.toISOString().slice(0, 10);
@@ -61,20 +67,47 @@ const Dashboard_main: React.FC = () => {
       setError("Failed to fetch finances");
     }
   };
-
   const loadCrops = async () => {
-    const start = startDate.toISOString().slice(0, 10);
-    const end = endDate.toISOString().slice(0, 10);
     try {
-      const data = await fetchData(
-        `http://127.0.0.1:5000/crops?start=${start}&end=${end}`
-      );
+      const data = await fetchData("http://127.0.0.1:5000/crops");
       setCrops(data);
     } catch {
       setError("Failed to fetch crops");
     }
   };
 
+  // 2) Fetch weather once
+  useEffect(() => {
+    const fetchWeather = (lat: number, lon: number) => {
+      fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+      )
+        .then((r) => r.json())
+        .then((d) =>
+          setWeather({
+            temperature: d.current_weather.temperature,
+            windspeed: d.current_weather.windspeed,
+          })
+        )
+        .catch((_) => {
+          console.warn("Weather fetch failed, using defaults");
+          setWeather({ temperature: 0, windspeed: 0 });
+        });
+    };
+
+    const defaultLat = 39.0119,
+      defaultLon = -98.4842;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => fetchWeather(coords.latitude, coords.longitude),
+        () => fetchWeather(defaultLat, defaultLon)
+      );
+    } else {
+      fetchWeather(defaultLat, defaultLon);
+    }
+  }, []);
+
+  // 3) Reload when date window changes
   useEffect(() => {
     setLoading(true);
     Promise.all([loadFinances(), loadCrops()]).finally(() =>
@@ -85,9 +118,7 @@ const Dashboard_main: React.FC = () => {
   if (loading) return <p className="p-6 text-center">Loading…</p>;
   if (error) return <p className="p-6 text-red-500">{error}</p>;
 
-  const handleQuestionSubmit = (question: string) => {
-    console.log("FAQ question:", question);
-  };
+  const handleQuestionSubmit = (q: string) => console.log("FAQ:", q);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -99,7 +130,7 @@ const Dashboard_main: React.FC = () => {
             <CalendarIcon size={20} className="text-gray-500 mr-2" />
             <DatePicker
               selected={startDate}
-              onChange={(date) => date && setStartDate(date)}
+              onChange={(d) => d && setStartDate(d)}
               selectsStart
               startDate={startDate}
               endDate={endDate}
@@ -109,7 +140,7 @@ const Dashboard_main: React.FC = () => {
             <span className="mx-2 text-gray-500">to</span>
             <DatePicker
               selected={endDate}
-              onChange={(date) => date && setEndDate(date)}
+              onChange={(d) => d && setEndDate(d)}
               selectsEnd
               startDate={startDate}
               endDate={endDate}
@@ -121,26 +152,21 @@ const Dashboard_main: React.FC = () => {
         </div>
       </header>
 
-      {/* Main content */}
+      {/* Main */}
       <main className="max-w-7xl mx-auto p-6">
-        {/* Stat cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <StatCards finances={finances} />
-        </div>
-
-        {/* Charts */}
         <Grid
           finances={finances}
           crops={crops}
           startDate={startDate}
           endDate={endDate}
+          cropCount={crops.length}
+          weather={weather || { temperature: 0, windspeed: 0 }}
         />
       </main>
 
-
       {showChat && (
         <FAQModal
-          isOpen={true}
+          isOpen
           closeModal={() => setShowChat(false)}
           onQuestionSubmit={handleQuestionSubmit}
         />

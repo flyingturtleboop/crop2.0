@@ -1,39 +1,54 @@
 import React from "react";
-import { DollarSign, TrendingUp, Calendar, Clock } from "lucide-react";
-import { Finance } from "../Dashboard_main";
+import { Layers, Wind, ThermometerSun, DollarSign } from "lucide-react";
+import { Finance, WeatherData } from "../Dashboard_main";
 
-interface StatCardsProps {
+export interface StatCardsProps {
   finances: Finance[];
+  cropCount: number;
+  weather: WeatherData;
 }
 
-export const StatCards: React.FC<StatCardsProps> = ({ finances }) => {
-  if (finances.length === 0) return null;
-
-  const latest = finances.reduce((a, b) =>
-    new Date(b.timestamp) > new Date(a.timestamp) ? b : a
-  );
+const StatCards: React.FC<StatCardsProps> = ({
+  finances,
+  cropCount,
+  weather,
+}) => {
+  // get latest total
+  const latestTotal =
+    finances.length > 0
+      ? finances.reduce((a, b) =>
+          new Date(b.timestamp) > new Date(a.timestamp) ? b : a
+        ).total
+      : 0;
 
   return (
     <>
+      {/* 1) Crops planted */}
+      <Card
+        title="Crops Planted"
+        value={String(cropCount)}
+        icon={<Layers size={28} className="text-green-600" />}
+      />
+
+      {/* 2) Wind speed */}
+      <Card
+        title="Wind Speed"
+        value={`${weather.windspeed.toFixed(0)} km/h`}
+        icon={<Wind size={28} className="text-blue-600" />}
+      />
+
+      {/* 3) Temperature */}
+      <Card
+        title="Temperature"
+        value={`${weather.temperature.toFixed(1)}°C`}
+        icon={<ThermometerSun size={28} className="text-orange-600" />}
+      />
+
+      {/* 4) Total revenue */}
       <Card
         title="Total Revenue"
-        value={`$${latest.total.toLocaleString()}`}
-        icon={<DollarSign size={28} className="text-green-600" />}
-      />
-      <Card
-        title="Avg Order"
-        value="$27.97"
-        icon={<TrendingUp size={28} className="text-blue-600" />}
-      />
-      <Card
-        title="Trailing Week"
-        value="$278,054.24"
-        icon={<Calendar size={28} className="text-purple-600" />}
-      />
-      <Card
-        title="Trailing Year"
-        value="$1,025,432.10"
-        icon={<Clock size={28} className="text-red-600" />}
+        value={`$${latestTotal.toLocaleString()}`}
+        icon={<DollarSign size={28} className="text-purple-600" />}
       />
     </>
   );
@@ -46,13 +61,13 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ title, value, icon }) => (
-  <div className="flex items-center bg-white rounded-2xl p-8 shadow hover:shadow-md transition-shadow min-h-[120px]">
-    <div className="bg-green-100 p-4 rounded-full">
-      {icon}
-    </div>
-    <div className="ml-6">
+  <div className="flex items-center bg-white rounded-2xl p-6 shadow hover:shadow-md transition min-h-[100px]">
+    <div className="bg-gray-100 p-3 rounded-full">{icon}</div>
+    <div className="ml-4">
       <p className="text-gray-500 text-sm">{title}</p>
-      <p className="mt-2 text-3xl font-semibold text-gray-900">{value}</p>
+      <p className="mt-1 text-2xl font-semibold text-gray-900">{value}</p>
     </div>
   </div>
 );
+
+export default StatCards;
