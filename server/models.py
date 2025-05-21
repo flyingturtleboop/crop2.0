@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
+# initialize SQLAlchemy
 db = SQLAlchemy()
 
 # Utility function to generate unique UUIDs
@@ -13,13 +14,15 @@ def get_uuid():
 # User model
 class User(db.Model):
     __tablename__ = "users"
-    id        = db.Column(db.String(32), primary_key=True, unique=True, default=get_uuid)
-    name      = db.Column(db.String(150), unique=True)
-    email     = db.Column(db.String(150), unique=True)
-    password  = db.Column(db.Text, nullable=False)
-    occupation= db.Column(db.Text, nullable=False)
-    crops     = db.relationship('Crop',   backref='owner', lazy=True, cascade="all, delete-orphan")
-    finances  = db.relationship('Finance',backref='owner', lazy=True, cascade="all, delete-orphan")
+    id         = db.Column(db.String(32), primary_key=True, unique=True, default=get_uuid)
+    name       = db.Column(db.String(150), unique=True)
+    email      = db.Column(db.String(150), unique=True)
+    password   = db.Column(db.Text, nullable=False)
+    occupation = db.Column(db.Text, nullable=False)
+
+    # One-to-many: a user can have many crops and finances
+    crops    = db.relationship('Crop',    back_populates='owner', cascade='all, delete-orphan', lazy=True)
+    finances = db.relationship('Finance', back_populates='owner', cascade='all, delete-orphan', lazy=True)
 
 # Crop model
 class Crop(db.Model):
@@ -31,12 +34,16 @@ class Crop(db.Model):
     amount_sown  = db.Column(db.Float, nullable=False)
     extra_notes  = db.Column(db.Text)
     location     = db.Column(db.String(150), nullable=True)
-    latitude     = db.Column(db.Float,   nullable=True)
-    longitude    = db.Column(db.Float,   nullable=True)
+    latitude     = db.Column(db.Float, nullable=True)
+    longitude    = db.Column(db.Float, nullable=True)
     crop_image   = db.Column(db.String(255), nullable=True)
     user_id      = db.Column(db.String(32), db.ForeignKey('users.id'), nullable=False)
 
-    soil_data = db.relationship("SoilData", backref="crop", lazy=True)
+    # Relationship to User
+    owner     = db.relationship('User', back_populates='crops', lazy=True)
+
+    # One-to-many: a crop can have many soil readings
+    soil_data = db.relationship('SoilData', back_populates='crop', cascade='all, delete-orphan', lazy=True)
 
 # Finance model
 class Finance(db.Model):
@@ -50,6 +57,9 @@ class Finance(db.Model):
     timestamp     = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     receipt_image = db.Column(db.String(255), nullable=True)
     user_id       = db.Column(db.String(32), db.ForeignKey('users.id'), nullable=False)
+
+    # Relationship to User
+    owner = db.relationship('User', back_populates='finances', lazy=True)
 
 # CropPlot model
 class CropPlot(db.Model):
@@ -67,18 +77,17 @@ class CropPlot(db.Model):
             'longitude': self.longitude,
         }
 
-# Finance total calculation
-@event.listens_for(Finance, 'before_insert')
+# Finance total calculation\@event.listens_for(Finance, 'before_insert')
 def update_total(mapper, connection, target):
     sess = Session(bind=connection)
-    last = sess.query(Finance)\
-               .filter(Finance.user_id == target.user_id)\
-               .order_by(Finance.timestamp.desc())\
+    last = sess.query(Finance) \
+               .filter(Finance.user_id == target.user_id) \
+               .order_by(Finance.timestamp.desc()) \
                .first()
     prev_total = last.total if last else 0.0
-    if target.status.lower() == "received":
+    if target.status.lower() == 'received':
         target.total = prev_total + target.amount
-    elif target.status.lower() == "sent":
+    elif target.status.lower() == 'sent':
         target.total = prev_total - target.amount
     else:
         target.total = prev_total
@@ -91,12 +100,10 @@ class Reminder(db.Model):
     date        = db.Column(db.Date, nullable=False)
     title       = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    user_id     = db.Column(db.String(32), db.ForeignKey("users.id"), nullable=False)
+    user_id     = db.Column(db.String(32), db.ForeignKey('users.id'), nullable=False)
 
-    user = db.relationship(
-        "User",
-        backref=db.backref("reminders", lazy=True, cascade="all, delete-orphan")
-    )
+    # Relationship to User
+    user = db.relationship('User', backref=db.backref('reminders', cascade='all, delete-orphan', lazy=True), lazy=True)
 
 # SoilData model
 class SoilData(db.Model):
@@ -112,7 +119,8 @@ class SoilData(db.Model):
     longitude    = db.Column(db.Float, nullable=True)
     crop_id      = db.Column(db.String(32), db.ForeignKey('crops.id'), nullable=False)
 
-    crop = db.relationship("Crop", backref="soil_data", lazy=True)
+    # Relationship to Crop
+    crop = db.relationship('Crop', back_populates='soil_data', lazy=True)
 
     def __repr__(self):
         return f"<SoilData id={self.id}, pH={self.pH}, moisture={self.moisture}, temperature={self.temperature}>"
