@@ -155,45 +155,30 @@ def allowed_file(fname):
 MODEL = None
 CLASS_NAMES = ['Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy', 'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___healthy', 'Grape___Black_rot', 'Grape___Esca_(Black_Measles)', 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)', 'Grape___healthy', 'Orange___Haunglongbing_(Citrus_greening)', 'Peach___Bacterial_spot', 'Peach___healthy', 'Pepper,_bell___Bacterial_spot', 'Pepper,_bell___healthy', 'Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy', 'Raspberry___healthy', 'Soybean___healthy', 'Squash___Powdery_mildew', 'Strawberry___Leaf_scorch', 'Strawberry___healthy', 'Tomato___Bacterial_spot', 'Tomato___Early_blight', 'Tomato___Late_blight', 'Tomato___Leaf_Mold', 'Tomato___Septoria_leaf_spot', 'Tomato___Spider_mites Two-spotted_spider_mite', 'Tomato___Target_Spot', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___Tomato_mosaic_virus', 'Tomato___healthy']
 
+from keras.saving import load_model as keras3_load_model  # Keras 3-compatible
+
 def load_model():
-    global MODEL
-    if not TENSORFLOW_AVAILABLE and keras is None:
-        print("⚠️ Neither TensorFlow nor Keras available. Model loading skipped.")
-        return False
-    
-    # Try multiple model paths and formats
-    model_paths = [
-        'AI_Model/plant_disease_model_version2.keras',
-        'AI_Model/plant_disease_model_version2_compatible.h5',
-        'AI_Model/plant_disease_model_version2.h5',
-        'AI_Model/plant_disease_model_version2_savedmodel'
-    ]
-    
-    for model_path in model_paths:
-        try:
-            if os.path.exists(model_path):
-                print(f"🔄 Trying to load: {model_path}")
-                
-                if TENSORFLOW_AVAILABLE and hasattr(tf, 'keras'):
-                    MODEL = tf.keras.models.load_model(model_path)
-                    print(f"✅ Model loaded successfully from: {model_path}")
-                elif keras is not None:
-                    MODEL = keras.models.load_model(model_path)
-                    print(f"✅ Model loaded successfully from: {model_path}")
-                else:
-                    continue
-                    
-                print(f"📊 Model input shape: {MODEL.input_shape}")
-                print(f"🏷️ Number of classes: {len(CLASS_NAMES)}")
-                return True
-                
-        except Exception as load_error:
-            print(f"❌ Failed to load {model_path}: {load_error}")
-            continue
-    
-    # If all loading attempts fail, create mock model
-    print("🔧 All model loading attempts failed. Creating mock model for development...")
+    import os
+
+    model_path = os.path.join(os.path.dirname(__file__), 'AI_Model', 'AI_Model', 'plant_disease_model_v3.keras')
+
+
+    try:
+        if os.path.exists(model_path):
+            print(f"🔄 Trying to load: {model_path}")
+            MODEL = keras3_load_model(model_path)
+            print(f"✅ Model loaded successfully from: {model_path}")
+            print(f"📊 Model input shape: {MODEL.input_shape}")
+            print(f"🏷️ Number of classes: {len(CLASS_NAMES)}")
+            return True
+        else:
+            print(f"❌ Model file not found: {model_path}")
+    except Exception as e:
+        print(f"❌ Failed to load model: {e}")
+
+    print("🔧 Loading mock model instead (dev fallback)...")
     return create_mock_model()
+
 
 def create_mock_model():
     """Create a simple mock model for development/testing"""
