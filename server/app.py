@@ -545,20 +545,23 @@ def check_model():
 
     return jsonify({'success': True})
 
-MODEL = tf.keras.models.load_model('newplantvillage/plant_disease_model.h5')
+MODEL = tf.keras.models.load_model('AI_Model/plant_disease_model_version2.keras')
+CLASS_NAMES = ['Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy', 'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___healthy', 'Grape___Black_rot', 'Grape___Esca_(Black_Measles)', 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)', 'Grape___healthy', 'Orange___Haunglongbing_(Citrus_greening)', 'Peach___Bacterial_spot', 'Peach___healthy', 'Pepper,_bell___Bacterial_spot', 'Pepper,_bell___healthy', 'Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy', 'Raspberry___healthy', 'Soybean___healthy', 'Squash___Powdery_mildew', 'Strawberry___Leaf_scorch', 'Strawberry___healthy', 'Tomato___Bacterial_spot', 'Tomato___Early_blight', 'Tomato___Late_blight', 'Tomato___Leaf_Mold', 'Tomato___Septoria_leaf_spot', 'Tomato___Spider_mites Two-spotted_spider_mite', 'Tomato___Target_Spot', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___Tomato_mosaic_virus', 'Tomato___healthy']
 
 @app.route('/api/analyze-leaf', methods=['POST'])
 def analyze_leaf():
+    print("Received analyze-leaf request")
     try:
         data = request.get_json()
-        image_data = data['imageData'].split(',')[1]  
+        image_data = data['imageData'].split(',')[1]  # strip base64 header
         image_bytes = base64.b64decode(image_data)
 
         image = Image.open(io.BytesIO(image_bytes)).resize((128, 128))
         img_array = np.array(image) / 255.0
 
+        # Ensure proper shape: (1, 128, 128, 3)
         if img_array.ndim == 2:
-            img_array = np.stack((img_array,)*3, axis=-1)
+            img_array = np.stack((img_array,) * 3, axis=-1)
         elif img_array.shape[2] == 4:
             img_array = img_array[:, :, :3]
 
@@ -567,17 +570,30 @@ def analyze_leaf():
         predictions = MODEL.predict(img_array)[0]
         confidence = float(np.max(predictions) * 100)
         class_index = int(np.argmax(predictions))
+        predicted_class = CLASS_NAMES[class_index]
 
-        is_healthy = class_index == 0 
+        is_healthy = "healthy" in predicted_class.lower()
+        
+        print("Decoding image...")
+        print("Image shape:", img_array.shape)
+        print("Predicting...")
+        print("Predictions:", predictions)
 
         return jsonify({
             'isHealthy': is_healthy,
             'confidence': confidence,
-            'details': 'Possible signs of leaf spot disease detected. Consider treatment with fungicide.' if not is_healthy else 'No visible signs of disease detected. Leaf appears healthy.'
+            'className': predicted_class,
+            'details': (
+                f"Detected: {predicted_class}. Leaf may need treatment." if not is_healthy 
+                else f"Detected: {predicted_class}. Leaf appears healthy."
+            )
         })
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/api/soil-data', methods=['POST'])
 @jwt_required()

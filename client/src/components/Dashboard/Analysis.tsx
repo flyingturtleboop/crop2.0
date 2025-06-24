@@ -1,9 +1,16 @@
 import { useState, useRef } from "react";
-import { Upload, ImagePlus, Check, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  Upload,
+  ImagePlus,
+  Check,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 
 interface AnalysisResult {
   healthy: boolean;
   confidence: string;
+  className: string;
   details: string;
 }
 
@@ -36,18 +43,20 @@ export default function LeafHealthAnalysis() {
   const triggerFileInput = () => fileInputRef.current?.click();
 
   const analyzeImage = async () => {
-    if (!selectedImage) return;
+    if (!selectedImage || !previewUrl) return;
     setAnalyzing(true);
 
     try {
       const img = new Image();
-      img.src = previewUrl!;
+      img.src = previewUrl;
       await new Promise((resolve) => (img.onload = resolve));
 
       const canvas = document.createElement("canvas");
       canvas.width = 128;
       canvas.height = 128;
-      const ctx = canvas.getContext("2d")!;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not create canvas context");
+
       ctx.drawImage(img, 0, 0, 128, 128);
       const imageBase64 = canvas.toDataURL("image/jpeg");
 
@@ -63,12 +72,14 @@ export default function LeafHealthAnalysis() {
       setResult({
         healthy: data.isHealthy,
         confidence: data.confidence.toFixed(1),
+        className: data.className,
         details: data.details,
       });
     } catch (err: any) {
       setResult({
         healthy: false,
         confidence: "0.0",
+        className: "Unknown",
         details: `Analysis failed: ${err.message}`,
       });
     } finally {
@@ -189,6 +200,9 @@ export default function LeafHealthAnalysis() {
                   ? "Healthy Leaf Detected"
                   : "Potential Issue Detected"}
               </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                <strong>Predicted Class:</strong> {result.className}
+              </p>
               <p className="mt-1 text-gray-600">{result.details}</p>
               <div className="mt-4">
                 <div className="flex justify-between mb-1">
