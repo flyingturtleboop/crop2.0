@@ -116,7 +116,7 @@ def google_callback():
 # CORS preflight
 @app.after_request
 def apply_cors(response):
-    response.headers["Access-Control-Allow-Origin"]  = "http://localhost:5173"
+    response.headers["Access-Control-Allow-Origin"]  = FRONTEND_URL
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     response.headers["Access-Control-Allow-Credentials"] = "true"
@@ -151,34 +151,54 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(fname):
     return '.' in fname and fname.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Model Configuration
+# Model Configuration - Updated to use plant_disease_model_v3.keras
 MODEL = None
 CLASS_NAMES = ['Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy', 'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___healthy', 'Grape___Black_rot', 'Grape___Esca_(Black_Measles)', 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)', 'Grape___healthy', 'Orange___Haunglongbing_(Citrus_greening)', 'Peach___Bacterial_spot', 'Peach___healthy', 'Pepper,_bell___Bacterial_spot', 'Pepper,_bell___healthy', 'Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy', 'Raspberry___healthy', 'Soybean___healthy', 'Squash___Powdery_mildew', 'Strawberry___Leaf_scorch', 'Strawberry___healthy', 'Tomato___Bacterial_spot', 'Tomato___Early_blight', 'Tomato___Late_blight', 'Tomato___Leaf_Mold', 'Tomato___Septoria_leaf_spot', 'Tomato___Spider_mites Two-spotted_spider_mite', 'Tomato___Target_Spot', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___Tomato_mosaic_virus', 'Tomato___healthy']
 
-from keras.saving import load_model as keras3_load_model  # Keras 3-compatible
-
 def load_model():
-    import os
-
-    model_path = os.path.join(os.path.dirname(__file__), 'AI_Model', 'AI_Model', 'plant_disease_model_v3.keras')
-
-
-    try:
+    global MODEL
+    
+    # Updated model path to use plant_disease_model_v3.keras
+    possible_paths = [
+        os.path.join(os.path.dirname(__file__), 'AI_Model', 'plant_disease_model_v3.keras'),
+        os.path.join(os.path.dirname(__file__), 'plant_disease_model_v3.keras'),
+        os.path.join(os.path.dirname(__file__), 'AI_Model', 'AI_Model', 'plant_disease_model_v3.keras'),
+        'plant_disease_model_v3.keras',
+        './plant_disease_model_v3.keras'
+    ]
+    
+    print("🔍 Searching for plant_disease_model_v3.keras...")
+    
+    for model_path in possible_paths:
+        print(f"  Checking: {model_path}")
         if os.path.exists(model_path):
-            print(f"🔄 Trying to load: {model_path}")
-            MODEL = keras3_load_model(model_path)
-            print(f"✅ Model loaded successfully from: {model_path}")
-            print(f"📊 Model input shape: {MODEL.input_shape}")
-            print(f"🏷️ Number of classes: {len(CLASS_NAMES)}")
-            return True
-        else:
-            print(f"❌ Model file not found: {model_path}")
-    except Exception as e:
-        print(f"❌ Failed to load model: {e}")
-
+            try:
+                print(f"🔄 Found model file! Loading from: {model_path}")
+                
+                if TENSORFLOW_AVAILABLE and hasattr(tf, 'keras'):
+                    MODEL = tf.keras.models.load_model(model_path)
+                elif keras is not None:
+                    MODEL = keras.models.load_model(model_path)
+                else:
+                    print("❌ No Keras available for loading model")
+                    return create_mock_model()
+                
+                print(f"✅ Model loaded successfully from: {model_path}")
+                print(f"📊 Model input shape: {MODEL.input_shape}")
+                print(f"🏷️ Number of classes: {len(CLASS_NAMES)}")
+                return True
+                
+            except Exception as e:
+                print(f"❌ Failed to load model from {model_path}: {e}")
+                continue
+    
+    print("❌ Model file 'plant_disease_model_v3.keras' not found in any expected location")
+    print("📁 Please ensure the model file is in one of these locations:")
+    for path in possible_paths:
+        print(f"   - {path}")
+    
     print("🔧 Loading mock model instead (dev fallback)...")
     return create_mock_model()
-
 
 def create_mock_model():
     """Create a simple mock model for development/testing"""
@@ -639,7 +659,7 @@ def model_status():
     return jsonify({
         'tensorflow_available': TENSORFLOW_AVAILABLE,
         'model_loaded': MODEL is not None,
-        'model_path': 'AI_Model/plant_disease_model_version2.keras',
+        'model_path': 'plant_disease_model_v3.keras',
         'classes_count': len(CLASS_NAMES),
         'available_classes': CLASS_NAMES[:5] + ['...'] if len(CLASS_NAMES) > 5 else CLASS_NAMES,
         'status': 'ready' if MODEL is not None else 'tensorflow_missing' if not TENSORFLOW_AVAILABLE else 'model_not_loaded'
@@ -647,10 +667,11 @@ def model_status():
 
 @app.route('/api/analyze-leaf', methods=['POST'])
 def analyze_leaf():
-    print("Received analyze-leaf request")
+    print("🔍 Received analyze-leaf request")
     
     # Check if TensorFlow/Keras is available
     if not TENSORFLOW_AVAILABLE and keras is None:
+        print("❌ TensorFlow/Keras not available")
         return jsonify({
             'error': 'TensorFlow/Keras not installed. Please install with: pip install tensorflow',
             'status': 'tensorflow_missing'
@@ -658,72 +679,125 @@ def analyze_leaf():
     
     # Check if model is loaded
     if MODEL is None:
+        print("❌ Model not loaded")
         return jsonify({
-            'error': 'AI model not loaded. Please check if the model file exists.',
-            'model_path': 'AI_Model/plant_disease_model_version2.keras',
+            'error': 'AI model not loaded. Please ensure plant_disease_model_v3.keras is available.',
+            'model_path': 'plant_disease_model_v3.keras',
             'status': 'model_not_loaded'
         }), 503
     
     try:
+        # Get the JSON data from request
         data = request.get_json()
         if not data or 'imageData' not in data:
+            print("❌ No image data provided")
             return jsonify({'error': 'No image data provided'}), 400
+        
+        print("📷 Processing image data...")
+        
+        # Decode base64 image
+        try:
+            # Remove data URL prefix if present
+            image_data = data['imageData']
+            if 'base64,' in image_data:
+                image_data = image_data.split('base64,')[1]
             
-        image_data = data['imageData'].split(',')[1]  # strip base64 header
-        image_bytes = base64.b64decode(image_data)
+            image_bytes = base64.b64decode(image_data)
+            print(f"✅ Image decoded successfully ({len(image_bytes)} bytes)")
+        except Exception as e:
+            print(f"❌ Failed to decode image: {e}")
+            return jsonify({'error': f'Invalid image data: {str(e)}'}), 400
 
         # Open and preprocess the image
-        image = Image.open(io.BytesIO(image_bytes))
-        
-        # Convert to RGB if necessary
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
+        try:
+            image = Image.open(io.BytesIO(image_bytes))
+            print(f"📊 Original image: {image.size}, mode: {image.mode}")
             
-        image = image.resize((128, 128))
-        img_array = np.array(image) / 255.0
+            # Convert to RGB if necessary
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+                print("🔄 Converted image to RGB")
+                
+            # Resize to model input size
+            image = image.resize((128, 128))
+            print("📏 Resized image to 128x128")
+            
+            # Convert to numpy array and normalize
+            img_array = np.array(image, dtype=np.float32) / 255.0
+            
+            # Ensure proper shape: (1, 128, 128, 3)
+            if len(img_array.shape) == 2:
+                img_array = np.stack((img_array,) * 3, axis=-1)
+            elif img_array.shape[2] == 4:  # RGBA to RGB
+                img_array = img_array[:, :, :3]
 
-        # Ensure proper shape: (1, 128, 128, 3)
-        if len(img_array.shape) == 2:
-            img_array = np.stack((img_array,) * 3, axis=-1)
-        elif img_array.shape[2] == 4:  # RGBA to RGB
-            img_array = img_array[:, :, :3]
-
-        img_array = np.expand_dims(img_array, axis=0)
-        
-        print(f"Image preprocessed - Shape: {img_array.shape}")
+            img_array = np.expand_dims(img_array, axis=0)
+            
+            print(f"✅ Image preprocessed - Shape: {img_array.shape}")
+            
+        except Exception as e:
+            print(f"❌ Image preprocessing failed: {e}")
+            return jsonify({'error': f'Image preprocessing failed: {str(e)}'}), 400
 
         # Make prediction
-        predictions = MODEL.predict(img_array)[0]
-        confidence = float(np.max(predictions) * 100)
-        class_index = int(np.argmax(predictions))
-        predicted_class = CLASS_NAMES[class_index]
+        try:
+            print("🤖 Making prediction...")
+            predictions = MODEL.predict(img_array, verbose=0)[0]
+            confidence = float(np.max(predictions) * 100)
+            class_index = int(np.argmax(predictions))
+            predicted_class = CLASS_NAMES[class_index]
 
+            print(f"🎯 Prediction: {predicted_class}")
+            print(f"📊 Confidence: {confidence:.2f}%")
+            print(f"🔢 Class index: {class_index}")
+
+        except Exception as e:
+            print(f"❌ Prediction failed: {e}")
+            return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
+
+        # Process results
         is_healthy = "healthy" in predicted_class.lower()
         
-        print(f"Prediction: {predicted_class} (Confidence: {confidence:.2f}%)")
+        # Parse plant name and condition
+        parts = predicted_class.split('___')
+        if len(parts) >= 2:
+            plant_name = parts[0].replace('_', ' ').title()
+            condition = parts[1].replace('_', ' ').title()
+        else:
+            plant_name = predicted_class.replace('_', ' ').title()
+            condition = "Unknown"
 
-        # Create more detailed response
-        plant_name = predicted_class.split('___')[0].replace('_', ' ')
-        condition = predicted_class.split('___')[1].replace('_', ' ')
+        # Generate detailed response
+        status_emoji = "✅" if is_healthy else "⚠️"
+        status_text = "This leaf appears healthy!" if is_healthy else "This leaf shows signs of disease and may need treatment."
         
-        return jsonify({
+        result = {
             'isHealthy': is_healthy,
             'confidence': round(confidence, 2),
             'className': predicted_class,
             'plantName': plant_name,
             'condition': condition,
-            'details': (
-                f"Plant: {plant_name}\nCondition: {condition}\nConfidence: {confidence:.1f}%\n" + 
-                ("✅ This leaf appears healthy!" if is_healthy else "⚠️ This leaf shows signs of disease and may need treatment.")
-            )
-        })
+            'details': f"Plant: {plant_name}\nCondition: {condition}\nConfidence: {confidence:.1f}%\n{status_emoji} {status_text}"
+        }
+        
+        print(f"✅ Analysis complete: {plant_name} - {condition} ({confidence:.1f}%)")
+        return jsonify(result)
 
     except Exception as e:
         import traceback
-        print(f"Error in analyze_leaf: {str(e)}")
+        print(f"❌ Unexpected error in analyze_leaf: {str(e)}")
         traceback.print_exc()
         return jsonify({'error': f'Analysis failed: {str(e)}'}), 500
 
 #  Run App 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=True)
+    print("\n" + "="*50)
+    print("🌱 CROP MANAGEMENT SYSTEM STARTING")
+    print("="*50)
+    print(f"🔧 TensorFlow Available: {TENSORFLOW_AVAILABLE}")
+    print(f"🤖 Model Loaded: {MODEL is not None}")
+    print(f"🌐 Frontend URL: {FRONTEND_URL}")
+    print(f"📁 Upload Folder: {UPLOAD_FOLDER}")
+    print("="*50 + "\n")
+    
+    app.run(debug=True, use_reloader=True, host='0.0.0.0', port=5000)
