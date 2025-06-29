@@ -257,7 +257,7 @@ const CalendarPage: React.FC = () => {
         )}
       </div>
 
-      {/* Edit Modal */}
+      { /* Edit modal */}
       {showModal && (
         <div className="modal">
           <div className="modal-content">

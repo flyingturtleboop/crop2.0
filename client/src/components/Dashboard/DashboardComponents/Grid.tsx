@@ -30,7 +30,7 @@ const Grid: React.FC<GridProps> = ({
 
   return (
     <div className="p-4 w-full">
-      {/* Stat cards row (uses full finances list for correct total) */}
+      {/* Stat cards row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <StatCards
           finances={finances}
@@ -39,7 +39,7 @@ const Grid: React.FC<GridProps> = ({
         />
       </div>
 
-      {/* Charts row (still uses filteredFinances) */}
+      {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white rounded-2xl shadow p-6">
           <LineGraph finances={filteredFinances} />

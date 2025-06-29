@@ -444,7 +444,7 @@
   background: #f0faff;
 }
 
-/*  Current day gray instead of yellow */
+/*  gray*/
 .react-calendar__tile--now {
   background-color: #e2e8f0 !important; 
   color: inherit !important;            
@@ -454,13 +454,13 @@
 .react-calendar__tile--now:enabled:hover {
   background-color: #cbd5e1 !important;
 }
-/*  Selected day in light green  */
+/* light green  */
 .react-calendar__tile--active {
   background-color: #dcfce7 !important; 
   color: #000 !important;
 }
 
-/* Hover state for the selected day */
+/* Hover state */
 .react-calendar__tile--active:enabled:hover {
   background-color: #bbf7d0 !important;
 }
@@ -621,7 +621,7 @@
   margin-bottom: 1rem;
 }
 
-/* Each item increments the counter and keeps your existing card styles */
+/* Each item increments the counter and keeps  existing card styles */
 .existing-reminder {
   counter-increment: reminder-counter;
   position: relative;
