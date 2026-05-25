@@ -1,325 +1,682 @@
 # CropAI
 
-Smart Crop Management. CropAI helps farmers track, analyze, and optimize their crops through a modern web interface and an AI model for disease detection.
+<div align="center">
+
+![React](https://img.shields.io/badge/Frontend-React-blue)
+![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue)
+![Flask](https://img.shields.io/badge/Backend-Flask-black)
+![TensorFlow](https://img.shields.io/badge/ML-TensorFlow-orange)
+![SQLite](https://img.shields.io/badge/Database-SQLite-green)
+![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
+
+**Full-stack AI crop management platform with CNN-based leaf disease detection, AI-generated health reports, farm dashboards, financial tracking, field mapping, reminders, and database-backed crop management.**
+
+</div>
+
+---
+
+## Overview
+
+CropAI is a full-stack AI crop management platform that helps farmers monitor plant health, manage farm operations, track finances, map field locations, schedule reminders, and generate AI-assisted crop health reports from leaf images.
+
+The core AI pipeline uses a TensorFlow/Keras convolutional neural network (CNN) to classify crop leaf images. Instead of only returning a raw prediction, the CNN output feeds into an AI workflow that generates a farmer-friendly plant health report with diagnosis context, recommendations, and next steps.
+
+CropAI was built with a React/TypeScript frontend, a Flask backend, SQLAlchemy database management, JWT authentication, Google Maps-style field mapping, and a TensorFlow CNN model for plant disease detection.
 
 ---
 
 ## Table of Contents
 
-* [About The Project](#about-the-project)
-  * [Built With](#built-with)
-  * [Screenshots](#screenshots)
-  * [Getting Started](#getting-started)
-  * [Dependencies](#dependencies)
-* [Usage](#usage)
-* [API Reference](#api-reference)
-* [Contributing](#contributing)
+- [Overview](#overview)
+- [Why I Built This](#why-i-built-this)
+- [Core Workflow](#core-workflow)
+- [Feature Summary](#feature-summary)
+- [Key Features](#key-features)
+- [AI / ML Pipeline](#ai--ml-pipeline)
+- [System Architecture](#system-architecture)
+- [Tech Stack](#tech-stack)
+- [Database-Backed Modules](#database-backed-modules)
+- [API Reference](#api-reference)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Project Results](#project-results)
+- [What I Learned](#what-i-learned)
+- [Future Improvements](#future-improvements)
+- [Repository](#repository)
 
 ---
 
-## About The Project
+## Why I Built This
 
-CropAI combines a React/TypeScript frontend, a Flask backend, and a TensorFlow CNN model to deliver:
+Many AI projects stop at model inference: upload an image, return a label, and end the workflow. CropAI was designed to go further by connecting model output to a complete product experience.
 
-* **Account & Profile Management**
-* **Crop & Finance Tracking**
-* **Interactive Field Mapping**
-* **Reminders & Calendar**
-* **AI-powered Leaf Disease Detection**
+The goal was to build a system where a farmer could:
 
-### Built With
+1. Upload an image of a crop leaf
+2. Receive a model prediction
+3. Get a clear explanation and recommendation
+4. Save or view the result through the platform
+5. Track related crop, soil, finance, reminder, and field data
+6. Use the platform as an ongoing farm management tool
 
-* **Frontend:** Vite, React, TypeScript, Tailwind CSS, lucide-react  
-* **Backend:** Flask, SQLAlchemy, Flask-Migrate, JWT Auth, Flask-Bcrypt  
-* **AI/ML:** TensorFlow/Keras (Adam optimizer)  
-* **Database:** SQLite  
+This made the project less like a standalone ML demo and more like a full-stack AI workflow system.
 
-### Some Screenshots
+---
 
-#### Dashboard
+## Core Workflow
 
-![Dashboard](Screenshots/Dashboard.png)
+```text
+User uploads crop leaf image
+        ↓
+Frontend sends image to Flask backend
+        ↓
+Backend preprocesses image
+        ↓
+TensorFlow/Keras CNN classifies plant health
+        ↓
+Prediction result feeds into AI report workflow
+        ↓
+Generated report explains the issue and next steps
+        ↓
+User can connect the result to crop records, dashboard data, and farm management workflows
+```
 
-#### AI ChatBot
+---
 
-![AI ChatBot](Screenshots/AIChatbot.png)
+## Feature Summary
 
-#### Leaf Health Analysis
+| Feature | Description |
+|---|---|
+| AI Leaf Analysis | Uses a TensorFlow/Keras CNN to classify crop leaf images |
+| AI Health Reports | Converts model output into farmer-friendly diagnosis and recommendations |
+| Crop Management | Add, edit, view, and delete crop records |
+| Finance Tracking | Track farming income, expenses, and operational costs |
+| Field Mapping | Map and manage farm plots using Google Maps-style functionality |
+| Soil Data | Store and update crop-specific soil readings |
+| Reminders | Schedule crop care tasks and follow-ups |
+| Authentication | User signup, login, JWT authentication, password hashing, and profile management |
+| Dashboard | Central interface for farm activity, crops, finances, reminders, and analysis |
 
-![Leaf Health Analysis](Screenshots/Analysis.png)
+---
 
-#### Maps
+## Key Features
 
-![Maps](Screenshots/Maps.png)
+### AI Leaf Disease Detection
 
-#### Login
+CropAI includes a custom TensorFlow/Keras CNN designed for crop leaf image classification.
 
-![Login](Screenshots/Login.png)
+Key details:
+
+- Built a CNN using TensorFlow/Keras
+- Trained the model to classify crop leaf images
+- Tuned the model to reach **86% accuracy**
+- Integrated the model into a Flask API endpoint
+- Added image preprocessing before inference
+- Supports Base64 image input through the `/api/analyze-leaf` route
+- Includes a model-check route to verify that the model file exists before inference
+
+---
+
+### AI-Generated Crop Health Reports
+
+Instead of only returning a class label, CropAI uses the CNN output as part of a larger AI workflow.
+
+The generated report can include:
+
+- Likely plant health issue
+- Disease or stress explanation
+- Recommended next steps
+- Prevention guidance
+- Follow-up actions
+- Farmer-friendly summary of the model result
+
+This makes the AI output more useful because farmers receive a practical explanation, not just a prediction.
+
+---
+
+### Crop Management
+
+CropAI supports database-backed crop management.
+
+Users can:
+
+- Add crop records
+- View all crops
+- Edit crop information
+- Delete crop entries
+- Connect crop records to soil readings, reminders, and analysis workflows
+
+This turns CropAI into a management system instead of only an analysis tool.
+
+---
+
+### Finance Tracking
+
+CropAI includes finance tracking for farm operations.
+
+Users can:
+
+- Add income and expense records
+- View finance history
+- Update finance records
+- Delete finance entries
+- Track operational costs connected to farming decisions
+
+This helps users think about crop health and farm operations from both a biological and financial perspective.
+
+---
+
+### Field Mapping
+
+CropAI includes interactive field mapping functionality.
+
+Users can:
+
+- Create mapped field plots
+- Store plot and location data
+- View field locations through a map-based interface
+- Connect spatial field data to farm management workflows
+
+This feature uses Google Maps-style mapping functionality to make the platform more practical for real-world farm tracking.
+
+---
+
+### Soil Data Management
+
+CropAI supports soil data tracking for crop-specific monitoring.
+
+Users can:
+
+- Add soil readings for a crop
+- View soil readings by crop ID
+- Update soil data
+- Delete soil records
+- Store soil-related information in the backend database
+
+This allows farmers to track more than just leaf health by storing additional agricultural context.
+
+---
+
+### Reminders and Calendar
+
+CropAI includes reminder and calendar functionality for farm tasks.
+
+Users can:
+
+- Create reminders
+- View upcoming reminders
+- Update reminder details
+- Delete reminders
+- Schedule follow-up actions after crop analysis
+
+Example use cases:
+
+- Watering reminders
+- Fertilizer reminders
+- Disease follow-up checks
+- Harvest planning
+- Soil testing reminders
+
+---
+
+### Authentication and Profile Management
+
+CropAI includes user authentication and account management.
+
+Authentication features include:
+
+- User signup
+- User login
+- JWT-based authentication
+- Password hashing with Flask-Bcrypt
+- User profile retrieval
+- User profile updates
+- Logout route
+
+This allows users to manage their own farm data securely.
+
+---
+
+### Dashboard
+
+The dashboard brings together key farm information in one interface.
+
+It can display:
+
+- Crop summaries
+- Finance data
+- Field activity
+- Recent analysis activity
+- Reminder information
+- Operational insights
+
+The goal of the dashboard is to make the platform feel like a real farm operating system rather than a collection of disconnected tools.
+
+---
+
+## AI / ML Pipeline
+
+### Model
+
+CropAI uses a convolutional neural network built with TensorFlow/Keras.
+
+| Component | Details |
+|---|---|
+| Framework | TensorFlow / Keras |
+| Model Type | Convolutional Neural Network |
+| Task | Crop leaf disease / health classification |
+| Optimizer | Adam |
+| Accuracy | 86% after tuning |
+| Backend Integration | Flask API endpoint |
+| Input Format | Base64 image upload |
+
+---
+
+### Training and Optimization
+
+The CNN was trained and tuned to improve classification performance.
+
+Model details:
+
+- Framework: TensorFlow/Keras
+- Model type: Convolutional Neural Network
+- Optimizer: Adam
+- Task: Crop leaf health / disease classification
+- Accuracy reached: **86%**
+
+---
+
+### Inference Flow
+
+```text
+Image input
+   ↓
+Image preprocessing
+   ↓
+CNN inference
+   ↓
+Prediction result
+   ↓
+AI-generated report
+   ↓
+Frontend display
+```
+
+---
+
+### Why the AI Workflow Matters
+
+The model prediction alone is not enough for a useful farming product. A farmer needs context:
+
+- What might be wrong?
+- How serious is it?
+- What should I do next?
+- How do I prevent it from spreading?
+- Should I track this against soil, crop, or field data?
+
+CropAI addresses this by connecting the CNN result to a generated report and management workflow.
+
+---
+
+## System Architecture
+
+### Main Application Architecture
+
+```text
+React + TypeScript Frontend
+        ↓
+Axios API Requests
+        ↓
+Flask REST API
+        ↓
+SQLAlchemy ORM
+        ↓
+SQLite Database
+        ↓
+Crop / Finance / Soil / Reminder / Plot Data
+```
+
+---
+
+### AI Analysis Architecture
+
+```text
+User uploads crop image
+        ↓
+Frontend encodes and sends image
+        ↓
+Flask backend receives image
+        ↓
+Backend validates and preprocesses image
+        ↓
+TensorFlow CNN runs prediction
+        ↓
+Prediction result is processed
+        ↓
+AI workflow generates report
+        ↓
+Report is returned to frontend
+```
+
+---
+
+### Data Management Architecture
+
+```text
+User action
+   ↓
+Frontend form or dashboard
+   ↓
+API request
+   ↓
+Flask route
+   ↓
+SQLAlchemy database operation
+   ↓
+Response returned to frontend
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | React, TypeScript, Vite, Tailwind CSS |
+| UI / Visualization | Recharts, React Calendar, React Datepicker, Lucide React, Framer Motion |
+| Backend | Flask, Flask-CORS, Flask-Migrate |
+| Database | SQLite, SQLAlchemy |
+| Authentication | Flask-JWT-Extended, Flask-Bcrypt |
+| AI / ML | TensorFlow, Keras, CNN, Adam Optimizer |
+| APIs / Integrations | Google Maps-style field mapping, REST APIs |
+
+---
+
+### Frontend
+
+- Vite
+- React
+- TypeScript
+- Tailwind CSS
+- React Router
+- Axios
+- Recharts
+- React Calendar
+- React Datepicker
+- React Dropzone
+- Lucide React
+- Framer Motion
+- Flowbite React
+- Bootstrap
+
+---
+
+### Backend
+
+- Flask
+- SQLAlchemy
+- Flask-Migrate
+- Flask-JWT-Extended
+- Flask-Bcrypt
+- Flask-CORS
+- SQLite
+
+---
+
+### AI / ML
+
+- TensorFlow
+- Keras
+- CNN image classification
+- Adam optimizer
+- Image preprocessing pipeline
+- AI-generated report workflow
+
+---
+
+### APIs and Integrations
+
+- Google Maps-style field mapping
+- REST API between React frontend and Flask backend
+- JWT authentication flow
+- Database-backed crop, finance, reminder, soil, and plot management
+
+---
+
+## Database-Backed Modules
+
+CropAI uses a backend database to store and manage user and farm data.
+
+| Module | Purpose |
+|---|---|
+| Users | Stores account, login, and profile information |
+| Crops | Stores crop records and crop-specific data |
+| Finances | Tracks income and expenses |
+| Soil Data | Stores soil readings connected to crops |
+| Reminders | Stores scheduled farm tasks |
+| Field Plots | Stores mapped farm plot/location data |
+| Analysis | Handles uploaded leaf images and model results |
+
+This makes the project more complete than a static frontend or isolated ML model because user actions persist through the backend.
+
+---
+
+## API Reference
+
+### Authentication and User Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/signup` | POST | Create a new user |
+| `/logintoken` | POST | Login and retrieve a JWT |
+| `/logout` | POST | Clear JWT cookie and log out |
+| `/profile/<email>` | GET | Fetch user profile by email |
+| `/profile/<email>` | PUT | Update user name, email, or password |
+
+---
+
+### Crop Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/crops` | GET | List all crops |
+| `/crops` | POST | Create a new crop |
+| `/crops/<crop_id>` | GET | Retrieve a single crop |
+| `/crops/<crop_id>` | PUT | Update a crop |
+| `/crops/<crop_id>` | DELETE | Delete a crop |
+
+---
+
+### Finance Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/finances` | GET | List all finance records |
+| `/finances` | POST | Create a finance record |
+| `/finances/<finance_id>` | PUT | Update a finance record |
+| `/finances/<finance_id>` | DELETE | Delete a finance record |
+
+---
+
+### Field Mapping Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/api/plots` | GET | List all field-map plots |
+| `/api/plots` | POST | Create a new field-map plot |
+
+---
+
+### Reminder Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/api/reminders` | GET | List all reminders |
+| `/api/reminders` | POST | Create a reminder |
+| `/api/reminders/<reminder_id>` | PUT | Update a reminder |
+| `/api/reminders/<reminder_id>` | DELETE | Delete a reminder |
+
+---
+
+### AI / Model Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/api/check-model` | POST | Verify that the model file exists |
+| `/api/analyze-leaf` | POST | Run CNN-based leaf disease detection on a Base64 image |
+
+---
+
+### Soil Data Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/api/soil-data` | POST | Create a new soil reading for a crop |
+| `/api/soil-data/<crop_id>` | GET | List all soil readings for a crop |
+| `/api/soil-data/<soil_id>` | PUT | Update a soil reading |
+| `/api/soil-data/<soil_id>` | DELETE | Delete a soil reading |
 
 ---
 
 ## Getting Started
 
-Follow these steps to get a local copy up and running.
-
 ### Prerequisites
 
-* **Node.js**  
-* **Python 3.8+**  
-* **Git**  
+Make sure you have the following installed:
 
-### Installation
-
-1. **Clone the repo**
-
-   ```bash
-   git clone <your-repo-url>
-   cd cropAI
-   ```
-
-2. **Frontend setup**
-
-   ```bash
-   cd client
-   npm install
-   npm run dev
-   # Visit http://localhost:5173
-   ```
-
-3. **Backend setup**
-
-   ```bash
-   cd server
-   python3 -m venv venv
-   source venv/bin/activate    # (Windows) venv\Scripts\activate.ps1
-   pip install -r requirements.txt
-   flask db upgrade          
-   flask run                
-   ```
+- Node.js
+- Python 3.8+
+- Git
 
 ---
 
-## Dependencies
+## Installation
 
-#### Frontend
+### 1. Clone the repository
 
-These are the direct packages our React app uses (installed via `npm install` in `client/`):
+```bash
+git clone https://github.com/psamin/crop2.0.git
+cd crop2.0
+```
 
-- @react-oauth/google@0.12.2  
-- @tailwindcss/vite@4.1.0  
-- axios@1.8.4  
-- bootstrap@5.3.5  
-- flowbite-react@0.11.7  
-- font-awesome@4.7.0  
-- framer-motion@12.7.4  
-- lucide-react@0.501.0  
-- react-calendar@5.1.0  
-- react-countup@6.5.3  
-- react-datepicker@8.3.0  
-- react-dom@19.1.0  
-- react-dropzone@14.3.8  
-- react-icons@5.5.0  
-- react-parallax@3.5.2  
-- react-router-dom@7.6.0  
-- react@19.1.0  
-- recharts@2.15.2  
-- router-dom@3.0.3  
-- tailwindcss@4.1.3  
+---
 
-#### Backend
+### 2. Set up the frontend
 
-Install all Python dependencies with:
+```bash
+cd client
+npm install
+npm run dev
+```
+
+The frontend should run at:
+
+```text
+http://localhost:5173
+```
+
+---
+
+### 3. Set up the backend
+
+Open a new terminal:
 
 ```bash
 cd server
-source venv/bin/activate     # or venv\Scripts\activate.ps1 on Windows
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
+flask db upgrade
+flask run
 ```
 
-And generate `requirements.txt` via:
+On Windows:
 
 ```bash
-pip freeze > requirements.txt
+cd server
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+flask db upgrade
+flask run
 ```
 
-Your `requirements.txt` should look like:
+The backend should run at:
 
+```text
+http://localhost:5000
 ```
-absl-py==2.2.2
-aiohappyeyeballs==2.6.1
-aiohttp==3.11.16
-aiosignal==1.3.2
-alembic==1.15.2
-annotated-types==0.7.0
-anyio==4.9.0
-astunparse==1.6.3
-attrs==25.3.0
-Authlib==1.5.2
-banks==2.1.1
-bcrypt==4.3.0
-beautifulsoup4==4.13.3
-blinker==1.9.0
-cachelib==0.13.0
-certifi==2025.1.31
-cffi==1.17.1
-charset-normalizer==3.4.1
-click==8.2.0
-colorama==0.4.6
-cryptography==45.0.2
-dataclasses-json==0.6.7
-Deprecated==1.2.18
-dirtyjson==1.0.8
-distro==1.9.0
-filetype==1.2.0
-Flask==3.1.1
-Flask-Bcrypt==1.0.1
-flask-cors==6.0.0
-Flask-JWT-Extended==4.7.1
-Flask-Migrate==4.1.0
-Flask-OAuthlib==0.9.6
-Flask-SQLAlchemy==3.1.1
-flatbuffers==25.2.10
-frozenlist==1.5.0
-fsspec==2025.3.2
-gast==0.6.0
-google-pasta==0.2.0
-greenlet==3.2.2
-griffe==1.7.2
-grpcio==1.71.0
-h11==0.14.0
-h5py==3.13.0
-httpcore==1.0.7
-httpx==0.28.1
-idna==3.10
-itsdangerous==2.2.0
-Jinja2==3.1.6
-jiter==0.9.0
-joblib==1.4.2
-keras==3.10.0
-libclang==18.1.1
-llama-cloud==0.1.17
-llama-cloud-services==0.6.9
-llama-index==0.12.28
-llama-index-agent-openai==0.4.6
-llama-index-cli==0.4.1
-llama-index-core==0.12.28
-llama-index-embeddings-openai==0.3.1
-llama-index-indices-managed-llama-cloud==0.6.11
-llama-index-llms-openai==0.3.30
-llama-index-multi-modal-llms-openai==0.4.3
-llama-index-program-openai==0.3.1
-llama-index-question-gen-openai==0.3.0
-llama-index-readers-file==0.4.7
-llama-index-readers-llama-parse==0.4.0
-llama-parse==0.6.4.post1
-Mako==1.3.10
-Markdown==3.8
-markdown-it-py==3.0.0
-MarkupSafe==3.0.2
-marshmallow==3.26.1
-mdurl==0.1.2
-ml_dtypes==0.5.1
-multidict==6.3.2
-mypy-extensions==1.0.0
-namex==0.0.9
-nest-asyncio==1.6.0
-networkx==3.4.2
-nltk==3.9.1
-numpy==2.1.3
-oauthlib==2.1.0
-openai==1.70.0
-opt_einsum==3.4.0
-optree==0.15.0
-packaging==24.2
-pandas==2.2.3
-pillow==11.1.0
-platformdirs==4.3.7
-propcache==0.3.1
-protobuf==5.29.4
-pycparser==2.22
-pydantic==2.11.2
-pydantic_core==2.33.1
-Pygments==2.19.1
-PyJWT==2.10.1
-pypdf==5.4.0
-python-dateutil==2.9.0.post0
-python-dotenv==1.1.0
-pytz==2025.2
-PyYAML==6.0.2
-regex==2024.11.6
-requests==2.32.3
-requests-oauthlib==1.1.0
-rich==14.0.0
-six==1.17.0
-sniffio==1.3.1
-soupsieve==2.6
-SQLAlchemy==2.0.41
-striprtf==0.0.26
-tenacity==9.1.2
-tensorboard==2.19.0
-tensorboard-data-server==0.7.2
-tensorflow==2.19.0
-tensorflow-io-gcs-filesystem==0.31.0
-termcolor==3.1.0
-tiktoken==0.9.0
-tqdm==4.67.1
-typing-inspect==0.9.0
-typing-inspection==0.4.0
-typing_extensions==4.13.2
-tzdata==2025.2
-urllib3==2.3.0
-Werkzeug==3.1.3
-wrapt==1.17.2
-yarl==1.18.3
-```
+
+---
 
 ## Usage
 
-[Back to top](#table-of-contents)
+After starting the frontend and backend, users can:
 
-### Running the Full Stack
+1. Create an account or log in
+2. Add crop records
+3. Track finances
+4. Upload crop leaf images for AI analysis
+5. View AI-generated plant health reports
+6. Add soil readings
+7. Create mapped field plots
+8. Schedule reminders
+9. Manage profile settings
 
-* **Frontend:** hot-reload at `http://localhost:5173`
-* **Backend:** serves JSON API at `http://localhost:5000`
+---
 
-After logging in or signing up, explore:
+## Project Results
 
-* **Dashboard** – View summaries
-* **Crops** – Add/edit/delete crop records
-* **Finances** – Track expenses & income
-* **Analysis** – Upload an image of your crop leaf to see if it is healthy or diseased
-* **Maps** – Pin and view field locations
-* **Settings** – Manage account & notifications
-* **Calendar** – Schedule reminders
+| Result | Detail |
+|---|---|
+| Competition | 2nd Internationally at TSA Software Development |
+| Model Accuracy | 86% CNN accuracy after tuning |
+| AI Workflow | CNN predictions feed into generated crop health reports |
+| Product Scope | Full-stack farm management platform |
+| Database | Persistent storage for crops, finances, soil data, reminders, plots, and users |
+| Mapping | Google Maps-style field location tracking |
+| Authentication | JWT auth and password hashing |
+| Investment | Turned down a $10,000 investment offer |
 
-## API Reference
+---
 
-| Route                             | Method           | Description                                                      |
-| --------------------------------- | ---------------- | ---------------------------------------------------------------- |
-| `/signup`                         | POST             | Create a new user                                                |
-| `/logintoken`                     | POST             | Login and retrieve a JWT                                         |
-| `/logout`                         | POST             | Clear JWT cookie (logout)                                        |
-| `/profile/<email>`                | GET              | Fetch user profile by email                                      |
-| `/profile/<email>`                | PUT              | Update user name, email, and/or password                         |
-| `/crops`                          | GET, POST        | List all crops or add a new crop                                 |
-| `/crops/<crop_id>`                | GET, PUT, DELETE | Retrieve, update, or delete a single crop                        |
-| `/finances`                       | GET, POST        | List all finance records or add a new one                        |
-| `/finances/<finance_id>`          | PUT, DELETE      | Update or delete a finance record                                |
-| `/api/plots`                      | GET, POST        | List all field-map plots or create a new plot                    |
-| `/api/reminders`                  | GET, POST        | List all reminders or add a new one                              |
-| `/api/reminders/<reminder_id>`    | PUT, DELETE      | Update or delete a reminder                                      |
-| `/api/check-model`                | POST             | Verify that the model file exists                                |
-| `/api/analyze-leaf`               | POST             | Run leaf disease detection on a Base64 image                     |
-| `/api/soil-data`                  | POST             | Create a new soil reading for a crop                             |
-| `/api/soil-data/<crop_id>`        | GET              | List all soil readings for a given crop                          |
-| `/api/soil-data/<soil_id>`        | PUT, DELETE      | Update or delete a specific soil reading                         |
+## What I Learned
 
-## Contributing
+CropAI taught me how to connect machine learning to a real product workflow.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -m 'Add feature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
-5. Open a Pull Request
+The most important challenge was not only training a CNN, but turning the model result into something useful for farmers. That meant connecting image classification to backend APIs, database records, dashboards, maps, and AI-generated recommendations.
 
-Please adhere to existing coding standards and include tests where applicable.
+This project helped me practice:
+
+- Designing a CNN image classification pipeline
+- Training and tuning a TensorFlow/Keras model
+- Building REST APIs with Flask
+- Managing relational data with SQLAlchemy
+- Implementing JWT-based authentication
+- Connecting frontend workflows to backend services
+- Integrating map-based field tracking
+- Turning AI predictions into user-facing recommendations
+- Building a product around a real operational problem
+
+---
+
+## Future Improvements
+
+| Improvement | Purpose |
+|---|---|
+| More crop disease classes | Expand model coverage |
+| Better model evaluation | Add confusion matrix, precision, recall, and F1 score |
+| Saved analysis history | Let farmers compare plant health over time |
+| Weather API integration | Add environmental context |
+| More advanced recommendations | Personalize reports based on crop, location, and soil |
+| Deployment | Host frontend and backend for public demo access |
+| Model monitoring | Track prediction quality and failures over time |
+| More field analytics | Connect mapped plots with crop performance and finances |
+
+---
+
+## Repository
+
+```text
+https://github.com/psamin/crop2.0
+```
