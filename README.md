@@ -26,19 +26,19 @@ The main AI pipeline uses a **TensorFlow/Keras CNN** to classify crop leaf image
 
 ### Login
 
-![CropAI Login](Login.png)
+![CropAI Login](Screenshots/Login.png)
 
 ### Dashboard
 
-![CropAI Dashboard](Dashboard.png)
+![CropAI Dashboard](Screenshots/Dashboard.png)
 
 ### AI Leaf Analysis
 
-![CropAI Analysis](Analysis.png)
+![CropAI Analysis](Screenshots/Analysis.png)
 
 ### AI Health Report
 
-![CropAI Health Report](healthreport.png)
+![CropAI Health Report](Screenshots/healthreport.png)
 
 ---
 
