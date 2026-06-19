@@ -56,9 +56,12 @@ from models import db, User, Crop, Finance, Reminder, get_uuid, CropPlot
 
 # App Initialization 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
-CORS(app, supports_credentials=True)
+# Use a stable secret from the environment so sessions/OAuth state survive
+# restarts; fall back to a random key only if none is configured.
+app.secret_key = os.getenv('SECRET_KEY') or os.urandom(24)
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+# Restrict CORS to the configured frontend origin instead of allowing any origin.
+CORS(app, supports_credentials=True, origins=[FRONTEND_URL])
 
 # OAuth via Authlib with OIDC discovery
 oauth = OAuth(app)
@@ -569,13 +572,27 @@ def delete_finance(finance_id):
 
 #  Map Plot Endpoints 
 @app.route('/api/plots', methods=['GET'])
+@jwt_required()
 def get_plots():
+    user = get_current_user()
+    if not user: return jsonify({'error':'User not found'}),404
     return jsonify([p.to_dict() for p in CropPlot.query.all()])
 
 @app.route('/api/plots', methods=['POST'])
+@jwt_required()
 def create_plot():
+    user = get_current_user()
+    if not user: return jsonify({'error':'User not found'}),404
     data=request.get_json() or {}
-    plot=CropPlot(name=data['name'], latitude=data.get('latitude',0), longitude=data.get('longitude',0))
+    name=(data.get('name') or '').strip()
+    if not name:
+        return jsonify({'error':'name is required'}),400
+    try:
+        latitude=float(data.get('latitude',0))
+        longitude=float(data.get('longitude',0))
+    except (TypeError, ValueError):
+        return jsonify({'error':'latitude and longitude must be numbers'}),400
+    plot=CropPlot(name=name, latitude=latitude, longitude=longitude)
     db.session.add(plot)
     db.session.commit()
     return jsonify(plot.to_dict()),201
@@ -646,12 +663,12 @@ def delete_reminder(reminder_id):
 # Model and AI Endpoints
 @app.route('/api/check-model', methods=['POST'])
 def check_model():
-    data = request.get_json()
-    model_path = data.get("modelPath")
-
-    if not model_path or not os.path.exists(model_path):
-        return jsonify({'success': False, 'error': 'Model not found'}), 404
-
+    # Report whether the app's own AI model is loaded. We intentionally do NOT
+    # accept a client-supplied filesystem path here, as that would let an
+    # unauthenticated caller probe for the existence of arbitrary files on the
+    # server.
+    if MODEL is None:
+        return jsonify({'success': False, 'error': 'Model not loaded'}), 404
     return jsonify({'success': True})
 
 @app.route('/api/model-status', methods=['GET'])
@@ -799,5 +816,12 @@ if __name__ == '__main__':
     print(f"🌐 Frontend URL: {FRONTEND_URL}")
     print(f"📁 Upload Folder: {UPLOAD_FOLDER}")
     print("="*50 + "\n")
-    
-    app.run(debug=True, use_reloader=True, host='0.0.0.0', port=5000)
+
+    # Debug mode exposes the Werkzeug interactive debugger, which allows
+    # arbitrary code execution. Keep it OFF unless explicitly enabled for
+    # local development via FLASK_DEBUG=1. Bind to localhost by default so the
+    # dev server is not exposed on all network interfaces.
+    debug_mode = os.getenv('FLASK_DEBUG', '0') == '1'
+    host = os.getenv('FLASK_HOST', '127.0.0.1')
+    port = int(os.getenv('FLASK_PORT', '5000'))
+    app.run(debug=debug_mode, use_reloader=debug_mode, host=host, port=port)
